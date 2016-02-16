@@ -4,11 +4,13 @@ const test = require("sdk/test");
 const tabs = require("sdk/tabs");
 const {ActivityStreams} = require("lib/ActivityStreams");
 const httpd = require("./lib/httpd");
+const {TabTracker} = require("lib/TabTracker");
 const {doGetFile} = require("./lib/utils");
 
 const PORT = 8099;
 
 exports["test messages"] = function*(assert) {
+  TabTracker.init();
   let path = "/dummy-activitystreams.html";
   let url = `http://localhost:${PORT}${path}`;
   let srv = httpd.startServerAsync(PORT, null, doGetFile("test/resources"));
@@ -65,6 +67,7 @@ exports["test messages"] = function*(assert) {
     tab.close();
   }
   app.unload();
+  TabTracker.uninit();
   yield new Promise(resolve => {
     srv.stop(() => {
       resolve();
