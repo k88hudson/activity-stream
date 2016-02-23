@@ -10,19 +10,13 @@ function buildQuery(items) {
     .join("&");
 }
 
-const actionsToSupplement = new Set([
-  am.type("TOP_FRECENT_SITES_RESPONSE"),
-  am.type("RECENT_BOOKMARKS_RESPONSE"),
-  am.type("RECENT_LINKS_RESPONSE")
-].map(type => am.type(type)));
-
 module.exports = () => next => action => {
   // We don't want to add extra data if the response is an error
   if (action.error) {
     return next(action);
   }
 
-  if (!actionsToSupplement.has(action.type)) {
+  if (!am.ACTIONS_WITH_SITES.has(action.type)) {
     return next(action);
   }
 

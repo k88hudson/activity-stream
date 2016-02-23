@@ -1,69 +1,26 @@
+const urlParse = require("url-parse");
 const am = require("actions/action-manager");
-const embedlyEndpoint = __CONFIG__.EMBEDLY_ENDPOINT;
-const {urlFilter, siteFilter} = require("lib/filters");
 
-function buildQuery(items) {
-  return "?" + items
-    .map(item => item.url)
-    .map(encodeURIComponent)
-    .map(url => "urls=" + url)
-    .join("&");
-}
-
-const actionsToSupplement = new Set([
-  am.type("TOP_FRECENT_SITES_RESPONSE"),
-  am.type("RECENT_BOOKMARKS_RESPONSE"),
-  am.type("RECENT_LINKS_RESPONSE")
-].map(type => am.type(type)));
+// This middleware adds a parsedUrl object to every action that has
+//
 
 module.exports = () => next => action => {
-  // We don't want to add extra data if the response is an error
-  if (action.error) {
+
+  if (!am.ACTIONS_WITH_SITES.has(action.type)) {
     return next(action);
   }
 
-  if (!actionsToSupplement.has(action.type)) {
+  if (action.error || !action.data || !action.data.length) {
     return next(action);
   }
 
-  if (!action.data.length) {
-    return next(action);
-  }
+  const data = action.data.map(site => {
+    if (!site.url) {
+      return site;
+    }
+    const parsedUrl = urlParse(site.url);
+    return Object.assign({}, site, {parsedUrl});
+  });
 
-  const sites = action.data.filter(urlFilter);
-  const filteredAction = Object.assign({}, action, {data: sites});
-
-  if (!sites.length) {
-    return next(filteredAction);
-  }
-
-  if (!embedlyEndpoint) {
-    return next(filteredAction);
-  }
-
-  fetch(embedlyEndpoint + buildQuery(sites))
-    .then(response => response.json())
-    .then(json => {
-      const data = sites
-        .filter(siteFilter)
-        .map(site => {
-          const details = json[site.url];
-          if (!details) {
-            return site;
-          }
-          return Object.assign({}, site, {
-            description: details.description,
-            title: details.title,
-            images: details.images,
-            favicon_url: details.favicon_url,
-            favicon_colors: details.favicon_colors,
-            media: details.media,
-            provider_name: details.provider_name
-          });
-        });
-
-      const newAction = Object.assign({}, action, {data});
-      next(newAction);
-    })
-    .catch(() => next(filteredAction));
+  next(Object.assign({}, action, {data}));
 };
