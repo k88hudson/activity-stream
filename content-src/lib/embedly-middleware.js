@@ -47,7 +47,7 @@ module.exports = () => next => action => {
           if (!details) {
             return site;
           }
-          return Object.assign({}, site, details);
+          return Object.assign({}, details, site);
         })
         .filter(siteFilter);
 

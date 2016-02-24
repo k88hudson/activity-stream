@@ -1,6 +1,7 @@
 const React = require("react");
 const SiteIcon = require("components/SiteIcon/SiteIcon");
 const {prettyUrl} = require("lib/utils");
+const classNames = require("classnames");
 
 const DEFAULT_LENGTH = 3;
 const ICON_SIZE = 40;
@@ -9,7 +10,7 @@ const ActivityFeedItem = React.createClass({
   render() {
     const site = this.props;
     const title = site.bookmarkTitle || site.title;
-    return (<li className="feed-item">
+    return (<li className={classNames("feed-item", {"bookmark": site.type === "bookmark"})}>
       <SiteIcon ref="icon" className="feed-icon" site={site} width={ICON_SIZE} height={ICON_SIZE} />
       <div className="feed-details">
         <div className="feed-description">

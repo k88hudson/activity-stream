@@ -1,6 +1,5 @@
 const React = require("react");
 const {connect} = require("react-redux");
-const {dedupeTwo} = require("lib/dedupe");
 
 const TopSites = require("components/TopSites/TopSites");
 const ActivityFeed = require("components/ActivityFeed/ActivityFeed");
@@ -33,7 +32,7 @@ const NewTabPage = React.createClass({
             <h3 className="section-title">Top Activity</h3>
             <ActivityFeed sites={props.Bookmarks.rows} length={2} />
 
-            <h3 className="section-title">Yesterday</h3>
+            <h3 className="section-title">Today</h3>
             <ActivityFeed sites={props.History.rows} length={6} />
           </section>
         </div>

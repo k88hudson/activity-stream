@@ -1,7 +1,7 @@
 const React = require("react");
 const SiteIcon = require("components/SiteIcon/SiteIcon");
 const DEFAULT_LENGTH = 6;
-const {toRGBString, prettyUrl} = require("lib/utils");
+const {toRGBString} = require("lib/utils");
 
 const TopSites = React.createClass({
   getDefaultProps() {
