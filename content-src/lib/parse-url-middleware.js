@@ -1,9 +1,6 @@
 const urlParse = require("url-parse");
 const am = require("actions/action-manager");
 
-// This middleware adds a parsedUrl object to every action that has
-//
-
 module.exports = () => next => action => {
 
   if (!am.ACTIONS_WITH_SITES.has(action.type)) {
@@ -19,8 +16,11 @@ module.exports = () => next => action => {
       return site;
     }
     const parsedUrl = urlParse(site.url);
+    if (!parsedUrl) {
+      return null;
+    }
     return Object.assign({}, site, {parsedUrl});
-  });
+  }).filter(item => item);
 
   next(Object.assign({}, action, {data}));
 };

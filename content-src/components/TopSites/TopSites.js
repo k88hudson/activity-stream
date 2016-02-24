@@ -27,7 +27,7 @@ const TopSites = React.createClass({
           try {
             color = site.favicon_colors[0].color;
           } catch (e) {
-            color = [333, 333, 333];
+            color = [251, 251, 251];
           }
           const backgroundColor = toRGBString(...color, 0.8);
           return (<a key={site.url} className="tile" href={site.url} style={{backgroundColor}}>

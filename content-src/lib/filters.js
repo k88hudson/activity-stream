@@ -1,4 +1,4 @@
-const TEMP_MAX_LENGTH = 100;
+const TEMP_MAX_LENGTH = 150;
 const ALLOWED_PROTOCOLS = new Set([
   "http:",
   "https:"
@@ -9,11 +9,12 @@ const DISALLOWED_HOSTS = new Set([
   "0.0.0.0"
 ]);
 
-function createFilter(definition) {
+function createFilter(definition, name) {
   return function(item) {
     let result = true;
-    definition.forEach(test => {
+    definition.forEach((test, i) => {
       if (!test(item)) {
+        console.log(`omitting ${item.url}\nbecause it failed test #${i} of ${name}`);
         result = false;
       }
     });
@@ -36,32 +37,6 @@ const DATA_FILTERS = [
 
 module.exports = {
   createFilter,
-  urlFilter: createFilter(URL_FILTERS),
-  siteFilter: createFilter(DATA_FILTERS),
-  dedupeFilter(item, i, array) {
-    let result = true;
-    if (!item.parsedUrl) return false;
-
-    array.forEach((otherSite, index) => {
-      if (index === i) {
-        return;
-      }
-      if (!otherSite.url || !otherSite.parsedUrl) {
-        return;
-      }
-      if (item.url === otherSite.url) {
-        return result = false;
-      }
-      if ((otherSite.parsedUrl.host + otherSite.parsedUrl.path) === (item.parsedUrl.host + item.parsedUrl.path)) {
-        return result = false;
-      }
-      if (item.url.protocol === "http:" && otherSite.url.replace(otherSite.parsedUrl.protocol) === item.url.replace(item.parsedUrl.protocol)) {
-        return result = false;
-      }
-      if (otherSite.url === item.url.replace("www.", "")) {
-        return result = false;
-      }
-    });
-    return result;
-  }
+  urlFilter: createFilter(URL_FILTERS, "URL_FILTERS"),
+  siteFilter: createFilter(DATA_FILTERS, "DATA_FILTERS")
 };

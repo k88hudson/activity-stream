@@ -1,5 +1,6 @@
 const React = require("react");
 const {connect} = require("react-redux");
+const {dedupeTwo} = require("lib/dedupe");
 
 const TopSites = require("components/TopSites/TopSites");
 const ActivityFeed = require("components/ActivityFeed/ActivityFeed");

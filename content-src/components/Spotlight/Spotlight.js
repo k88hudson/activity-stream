@@ -94,7 +94,7 @@ const Spotlight = React.createClass({
     return (<section className="spotlight">
       <h3 className="section-title">Spotlight</h3>
       <ul>
-        {sites.map(site => <SpotlightItem key={site.url} {...site} />)}
+        {sites.map((site, i) => <SpotlightItem key={i} {...site} />)}
         {blankSites}
       </ul>
     </section>);

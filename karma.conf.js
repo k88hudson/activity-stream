@@ -31,7 +31,7 @@ module.exports = function(config) {
       ]
     },
     files: [
-      "content-test/index.js"
+      "content-test/lib/dedupe.test.js"
     ],
     preprocessors: {
       "content-test/**/*.js": ["webpack", "sourcemap"]

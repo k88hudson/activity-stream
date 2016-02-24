@@ -1,6 +1,7 @@
 const am = require("actions/action-manager");
 const embedlyEndpoint = __CONFIG__.EMBEDLY_ENDPOINT;
-const {urlFilter, siteFilter, dedupeFilter} = require("lib/filters");
+const {urlFilter, siteFilter} = require("lib/filters");
+const {innerDedupe} = require("lib/dedupe");
 
 function buildQuery(items) {
   return "?" + items
@@ -24,7 +25,7 @@ module.exports = () => next => action => {
     return next(action);
   }
 
-  const sites = action.data.filter(urlFilter).filter(dedupeFilter);
+  const sites = innerDedupe(action.data.filter(urlFilter));
 
   const filteredAction = Object.assign({}, action, {data: sites});
 
