@@ -18,7 +18,7 @@ const NewTabPage = React.createClass({
   },
   componentDidUpdate() {
     if (this.props.isReady) {
-      this.props.dispatch(actions.NotifyTelemetry("NEWTAB_RENDER"));
+      this.props.dispatch(actions.NotifyPerf("NEWTAB_RENDER"));
     }
   },
   render() {

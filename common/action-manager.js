@@ -19,6 +19,7 @@ const am = new ActionManager([
   "SEARCH_STATE_RESPONSE",
   "NOTIFY_ROUTE_CHANGE",
   "NOTIFY_PERFORMANCE",
+  "NOTIFY_TELEMETRY"
 ]);
 
 // This is a a set of actions that have sites in them,
@@ -115,8 +116,12 @@ function NotifyRouteChange(data) {
   return Notify("NOTIFY_ROUTE_CHANGE", data);
 }
 
-function NotifyTelemetry(data) {
+function NotifyPerf(data) {
   return Notify("NOTIFY_PERFORMANCE", data);
+}
+
+function NotifyClick(data) {
+  return Notify("NOTIFY_TELEMETRY", data);
 }
 
 am.defineActions({
@@ -133,7 +138,8 @@ am.defineActions({
   NotifyHistoryDelete,
   NotifyPerformSearch,
   NotifyRouteChange,
-  NotifyTelemetry,
+  NotifyPerf,
+  NotifyClick
 });
 
 module.exports = am;
