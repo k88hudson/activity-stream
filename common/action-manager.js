@@ -120,8 +120,8 @@ function NotifyPerf(data) {
   return Notify("NOTIFY_PERFORMANCE", data);
 }
 
-function NotifyClick(data) {
-  return Notify("NOTIFY_TELEMETRY", data);
+function NotifyEvent(data) {
+  return Notify("NOTIFY_USER_EVENT", data);
 }
 
 am.defineActions({
@@ -139,7 +139,7 @@ am.defineActions({
   NotifyPerformSearch,
   NotifyRouteChange,
   NotifyPerf,
-  NotifyClick
+  NotifyEvent
 });
 
 module.exports = am;

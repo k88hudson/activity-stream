@@ -59,15 +59,33 @@ SpotlightItem.propTypes = {
   favicon_url: React.PropTypes.string,
   title: React.PropTypes.string.isRequired,
   description: React.PropTypes.string.isRequired,
-  onDelete: React.PropTypes.func
+  onDelete: React.PropTypes.func,
+  onClick: React.PropTypes.onClick
 };
 
 const Spotlight = React.createClass({
   getDefaultProps() {
-    return {length: DEFAULT_LENGTH};
+    return {
+      length: DEFAULT_LENGTH,
+      page: "NEW_TAB"
+    };
   },
-  onDelete(url) {
+  onClick(index) {
+    this.props.dispatch(actions.NotifyEvent({
+      event: "CLICK",
+      page: this.props.page,
+      source: "SPOTLIGHT",
+      action_position: index
+    }));
+  },
+  onDelete(url, index) {
     this.props.dispatch(actions.NotifyHistoryDelete(url));
+    this.props.dispatch(actions.NotifyEvent({
+      event: "DELETE",
+      page: this.props.page,
+      source: "SPOTLIGHT",
+      action_position: index
+    }));
   },
   render() {
     const sites = this.props.sites.slice(0, this.props.length);
@@ -78,7 +96,11 @@ const Spotlight = React.createClass({
     return (<section className="spotlight">
       <h3 className="section-title">Featured</h3>
       <ul>
-        {sites.map((site, i) => <SpotlightItem index={i} key={site.url} onDelete={this.onDelete} {...site} />)}
+        {sites.map((site, i) => <SpotlightItem index={i}
+          key={site.url}
+          onDelete={url => this.onDelete(url, i)}
+          onClick={() => this.onClick(i)}
+          {...site} />)}
         {blankSites}
       </ul>
     </section>);
@@ -86,6 +108,7 @@ const Spotlight = React.createClass({
 });
 
 Spotlight.propTypes = {
+  page: React.PropTypes.string,
   sites: React.PropTypes.array.isRequired,
   length: React.PropTypes.number
 };

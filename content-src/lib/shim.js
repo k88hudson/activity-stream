@@ -9,7 +9,6 @@ function dispatch(action) {
 module.exports = function() {
   window.addEventListener("content-to-addon", function(event) {
     const action = JSON.parse(event.detail);
-    console.log(action);
     switch (action.type) {
       case "TOP_FRECENT_SITES_REQUEST":
         dispatch({type: "TOP_FRECENT_SITES_RESPONSE", data: fakeData.TopSites.rows});

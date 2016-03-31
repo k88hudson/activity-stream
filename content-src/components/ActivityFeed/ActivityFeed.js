@@ -14,6 +14,8 @@ const SESSION_DIFF = 600000;
 const ActivityFeedItem = React.createClass({
   getDefaultProps() {
     return {
+      onShare: function() {},
+      onClick: function() {},
       onDelete: function() {},
       showDate: false
     };
@@ -46,7 +48,7 @@ const ActivityFeedItem = React.createClass({
     }
 
     return (<li className={classNames("feed-item", {bookmark: site.bookmarkGuid})}>
-      <a href={site.url} ref="link">
+      <a onClick={this.props.onClick} href={site.url} ref="link">
         {icon}
         <div className="feed-details">
           <div className="feed-description">
@@ -60,7 +62,7 @@ const ActivityFeedItem = React.createClass({
       </a>
       <div className="action-items-container">
         <div className="action-item icon-delete" ref="delete" onClick={() => this.props.onDelete(site.url)}></div>
-        <div className="action-item icon-share" onClick={() => alert("Sorry. We are still working on this feature.")}></div>
+        <div className="action-item icon-share" onClick={() => this.props.onShare(site.url)}></div>
         <div className="action-item icon-more" onClick={() => alert("Sorry. We are still working on this feature.")}></div>
       </div>
     </li>);
@@ -68,6 +70,8 @@ const ActivityFeedItem = React.createClass({
 });
 
 ActivityFeedItem.propTypes = {
+  onShare: React.PropTypse.func,
+  onClick: React.PropTypes.func,
   url: React.PropTypes.string.isRequired,
   images: React.PropTypes.array,
   title: React.PropTypes.string,
@@ -89,11 +93,16 @@ const ActivityFeed = React.createClass({
   render() {
     const sites = this.props.sites.slice(0, this.props.length);
     return (<ul className="activity-feed">
-      {sites.map((site, i) => <ActivityFeedItem key={i}
-        onDelete={this.props.onDelete}
-        showImage={getRandomFromTimestamp(0.2, site)}
-        showDate={this.props.showDate && i === 0}
-        {...site} />)}
+      {sites.map((site, i) => {
+        const combinedIndex = this.props.index * 1000 + i;
+        return (<ActivityFeedItem key={i}
+            onClick={() => this.props.onClick(combinedIndex)}
+            onShare={url => this.props.onShare(url, combinedIndex)}
+            onDelete={url => this.props.onDelete(url, combinedIndex)}
+            showImage={getRandomFromTimestamp(0.2, site)}
+            showDate={this.props.showDate && i === 0}
+            {...site} />);
+      })}
     </ul>);
   }
 });
@@ -144,8 +153,31 @@ const GroupedActivityFeed = React.createClass({
       dateKey: "lastVisitDate"
     };
   },
-  onDelete(url) {
+  onClick(index) {
+    this.props.dispatch(actions.NotifyEvent({
+      event: "CLICK",
+      page: this.props.page,
+      source: "ACTIVITY_FEED",
+      action_position: index
+    }));
+  },
+  onDelete(url, index) {
     this.props.dispatch(actions.NotifyHistoryDelete(url));
+    this.props.dispatch(actions.NotifyEvent({
+      event: "CLICK",
+      page: this.props.page,
+      source: "ACTIVITY_FEED",
+      action_position: index
+    }));
+  },
+  onShare(url, index) {
+    alert("Sorry. We are still working on this feature.");
+    this.props.dispatch(actions.NotifyEvent({
+      event: "SHARE",
+      page: this.props.page,
+      source: "ACTIVITY_FEED",
+      action_position: index
+    }));
   },
   render() {
     const sites = this.props.sites
@@ -163,7 +195,9 @@ const GroupedActivityFeed = React.createClass({
           {groupedSites.get(date).map((sites, i) => {
             return (<ActivityFeed
               key={date + "-session-" + i}
-              onDelete={this.onDelete}
+              index={i}
+              onClick={this.onClick}
+              onDelete={url => this.onDelete(url, i)}
               sites={sites}
               length={sites.length}
               showDate={i === 0} />);
@@ -178,7 +212,8 @@ GroupedActivityFeed.propTypes = {
   sites: React.PropTypes.array.isRequired,
   length: React.PropTypes.number,
   title: React.PropTypes.string,
-  dateKey: React.PropTypes.string
+  dateKey: React.PropTypes.string,
+  page: React.PropTypes.string
 };
 
 module.exports = connect(justDispatch)(GroupedActivityFeed);

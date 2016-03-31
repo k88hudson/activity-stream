@@ -3,7 +3,7 @@ const {connect} = require("react-redux");
 const {selectSpotlight} = require("selectors/selectors");
 const GroupedActivityFeed = require("components/ActivityFeed/ActivityFeed");
 const Spotlight = require("components/Spotlight/Spotlight");
-const {RequestMoreBookmarks} = require("common/action-manager").actions;
+const {RequestMoreBookmarks, NotifyEvent} = require("common/action-manager").actions;
 const LoadMore = require("components/LoadMore/LoadMore");
 
 const TimelineBookmarks = React.createClass({
@@ -14,13 +14,21 @@ const TimelineBookmarks = React.createClass({
     }
     const beforeDate = bookmarks[bookmarks.length - 1].lastModified;
     this.props.dispatch(RequestMoreBookmarks(beforeDate));
+    this.props.dispatch(NotifyEvent({
+      event: "LOAD_MORE",
+      page: "TIMELINE_BOOKMARKS",
+      source: "ACTIVITY_FEED"
+    }));
   },
   render() {
     const props = this.props;
     return (<div className="wrapper">
-      <Spotlight sites={props.Spotlight.rows} />
+      <Spotlight page="TIMELINE_BOOKMARKS" sites={props.Spotlight.rows} />
       <GroupedActivityFeed title="Just now" sites={props.Bookmarks.rows} length={20} />
-      <LoadMore loading={props.Bookmarks.isLoading} hidden={!props.Bookmarks.canLoadMore || !props.Bookmarks.rows.length} onClick={this.getMore}
+      <LoadMore
+        loading={props.Bookmarks.isLoading}
+        hidden={!props.Bookmarks.canLoadMore || !props.Bookmarks.rows.length}
+        onClick={this.getMore}
         label="See more activity"/>
     </div>);
   }

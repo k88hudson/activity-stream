@@ -12,6 +12,10 @@ const NewTabPage = React.createClass({
   // TODO: Replace with real search api via addon
   onSearch(value) {
     this.props.dispatch(actions.NotifyPerformSearch(value));
+    this.props.dispatch(actions.NotifyEvent({
+      event: "SEARCH",
+      page: "NEW_TAB"
+    }));
   },
   componentDidMount() {
     document.title = "New Tab";
@@ -35,7 +39,7 @@ const NewTabPage = React.createClass({
           </section>
 
           <section>
-            <Spotlight sites={props.Spotlight.rows} />
+            <Spotlight page="NEW_TAB" sites={props.Spotlight.rows} />
           </section>
 
           <section>
