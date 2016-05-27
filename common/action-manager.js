@@ -13,6 +13,8 @@ const am = new ActionManager([
   "RECENT_LINKS_RESPONSE",
   "HIGHLIGHTS_LINKS_REQUEST",
   "HIGHLIGHTS_LINKS_RESPONSE",
+  "EXPERIMENTS_REQUEST",
+  "EXPERIMENTS_RESPONSE",
   "NOTIFY_BLOCK_URL",
   "NOTIFY_UNBLOCK_URL",
   "NOTIFY_UNBLOCK_ALL",
@@ -110,6 +112,10 @@ function RequestSearchState() {
   return RequestExpect("SEARCH_STATE_REQUEST", "SEARCH_STATE_RESPONSE");
 }
 
+function RequestExperiments() {
+  return RequestExpect("EXPERIMENTS_REQUEST", "EXPERIMENTS_RESPONSE");
+}
+
 function NotifyBookmarkDelete(data) {
   return Notify("NOTIFY_BOOKMARK_DELETE", data);
 }
@@ -170,6 +176,7 @@ am.defineActions({
   RequestMoreRecentLinks,
   RequestHighlightsLinks,
   RequestSearchState,
+  RequestExperiments,
   NotifyBlockURL,
   NotifyUnblockURL,
   NotifyUnblockAll,
