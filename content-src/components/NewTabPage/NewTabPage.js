@@ -20,12 +20,13 @@ const NewTabPage = React.createClass({
       showSettingsMenu: false
     };
   },
-  resetBlockList() {
+  toggleRecommendation() {
     this.props.dispatch(actions.NotifyEvent({
-      event: "UNBLOCK_ALL",
+      event: "TOGGLE_RECOMMENDATION",
       page: PAGE_NAME
     }));
-    this.props.dispatch(actions.NotifyUnblockAll());
+    this.props.dispatch(actions.NotifyToggleRecommendations());
+    this.props.dispatch(actions.RequestHighlightsLinks());
   },
   componentDidMount() {
     document.title = "New Tab";
@@ -38,6 +39,8 @@ const NewTabPage = React.createClass({
   },
   render() {
     const props = this.props;
+    let recommendationLabel = "Show Trending Highlights";
+    let recommendationIcon = this.props.Spotlight.recommendationShown ? "check" : "   ";
     return (<main className="new-tab">
       <div className="new-tab-wrapper">
         <section>
@@ -79,7 +82,7 @@ const NewTabPage = React.createClass({
                 visible={this.state.showSettingsMenu}
                 onUpdate={showSettingsMenu => this.setState({showSettingsMenu})}
                 options={[
-                  {label: "Reset Block List", onClick: this.resetBlockList}
+                  {icon: `${recommendationIcon}`, label: `${recommendationLabel}`, onClick: this.toggleRecommendation}
                 ]} />
             </span>
           </section>
