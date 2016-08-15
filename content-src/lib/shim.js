@@ -49,6 +49,15 @@ module.exports = function() {
       case "HIGHLIGHTS_LINKS_REQUEST":
         dispatch({type: "HIGHLIGHTS_LINKS_RESPONSE", data: fakeData.Highlights.rows});
         break;
+      case "EXPERIMENTS_REQUEST":
+        dispatch({type: "EXPERIMENTS_RESPONSE", data: {}});
+        break;
+      case "PREFS_REQUEST":
+        dispatch({type: "PREFS_RESPONSE", data: {}});
+        break;
+      case "WEIGHTED_HIGHLIGHTS_REQUEST":
+        dispatch({type: "WEIGHTED_HIGHLIGHTS_RESPONSE", data: []});
+        break;
     }
   }, false);
 };

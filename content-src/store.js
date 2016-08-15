@@ -3,6 +3,9 @@ const {ADDON_TO_CONTENT, CONTENT_TO_ADDON} = require("common/event-constants");
 const thunk = require("redux-thunk").default;
 const reducers = require("reducers/reducers");
 const {Channel} = require("lib/ReduxChannel");
+const fakeData = require("lib/fake-data-raw");
+
+console.log(JSON.stringify(fakeData, null, 2));
 
 const channel = new Channel({
   incoming: ADDON_TO_CONTENT,
@@ -26,6 +29,7 @@ if (__CONFIG__.LOGGING) {
 
 const store = createStore(
   combineReducers(reducers),
+  fakeData,
   applyMiddleware(...middleware)
 );
 
