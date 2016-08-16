@@ -1,5 +1,5 @@
-const req = require.context(".", true, /\.test.js$/);
-const files = req.keys();
+// const req = require.context(".", true, /\.test.js$/);
+// const files = req.keys();
 const {overrideConsoleError} = require("test/test-utils");
 
 describe("ActivtyStreams", () => {
@@ -23,5 +23,5 @@ describe("ActivtyStreams", () => {
 
   // files.forEach(file => req(file));
   // In order to target specific files, comment out the above line and uncomment the following one.
-  req("./meta/Mocks.test.js");
+  require("./meta/Mocks.test.js");
 });

@@ -9,7 +9,7 @@ module.exports = function(config) {
   config.set({
     singleRun: true,
     browsers: ["Firefox"],
-    frameworks: ["mocha"],
+    frameworks: ["mocha", "sinon", "chai"],
     reporters,
     coverageReporter: {
       dir: "logs/reports/coverage",
@@ -50,14 +50,23 @@ module.exports = function(config) {
           "sdk": "mocks/sdk"
         })
       },
+      resolveLoader: {
+        alias: {
+          inject: path.join(__dirname, "loaders/inject-loader")
+        }
+      },
       // resolve: webpack.resolve,
       module: {
         loaders: webpack.module.loaders,
         postLoaders: [{
           test: /\.js$/,
           loader: "istanbul-instrumenter",
-          include: [path.join(__dirname, "/content-src")],
-          exclude: [/DebugPage/]
+          include: [
+            path.join(__dirname, "content-test/meta"),
+            // path.join(__dirname, "/content-src"),
+            // path.join(__dirname, "/common")],
+          ],
+          exclude: [/DebugPage/, /\.test\.js$/]
         }]
       },
       plugins: webpack.plugins
