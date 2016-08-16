@@ -1,6 +1,5 @@
 const webpack = require("./webpack.config");
 const path = require("path");
-
 const reporters = ["mocha", "coverage"];
 if (process.env.TRAVIS) {
   reporters.push("coveralls");
@@ -42,8 +41,16 @@ module.exports = function(config) {
     proxies: {"/favicons/": "/base/data/content/favicons/"},
     preprocessors: {"content-test/**/*.js": ["webpack", "sourcemap"]},
     webpack: {
-      devtool: "inline-source-map",
-      resolve: webpack.resolve,
+      devtool: "source-map",
+      resolve: {
+        extensions: webpack.resolve.extensions,
+        alias: Object.assign({}, webpack.resolve.alias, {
+          "mocks": path.join(__dirname, "mocks"),
+          "chrome": "mocks/chrome.js",
+          "sdk": "mocks/sdk"
+        })
+      },
+      // resolve: webpack.resolve,
       module: {
         loaders: webpack.module.loaders,
         postLoaders: [{

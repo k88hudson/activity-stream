@@ -21,7 +21,7 @@ describe("ActivtyStreams", () => {
     window.confirm = originalConfirm;
   });
 
-  files.forEach(file => req(file));
+  // files.forEach(file => req(file));
   // In order to target specific files, comment out the above line and uncomment the following one.
-  // req("./components/NewTabPage.test.js");
+  req("./meta/Mocks.test.js");
 });

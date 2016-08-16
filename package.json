@@ -68,6 +68,8 @@
     "npm-run-all": "2.3.0",
     "react-addons-test-utils": "15.3.0",
     "requirejs": "2.2.0",
+    "rewire": "2.5.2",
+    "rewire-webpack": "1.0.1",
     "rimraf": "2.5.4",
     "sass-lint": "1.8.2",
     "tippy-top-sites": "0.2.0",
