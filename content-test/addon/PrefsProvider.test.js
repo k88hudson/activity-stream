@@ -2,7 +2,7 @@ const {PrefsProvider} = require("../../lib/PrefsProvider");
 const {assert} = require("chai");
 const EventEmitter = require("eventemitter2");
 
-class SimplePrefsMock extends EventEmitter {
+class SimplePrefs extends EventEmitter {
   constructor(prefs) {
     super();
     this.prefs = prefs || {};
@@ -16,7 +16,7 @@ describe("PrefsProvider", () => {
   // Override as necessary with the setup function.
   function setup(customOptions = {}) {
     prefsProvider = new PrefsProvider(Object.assign({}, {
-      simplePrefs: new SimplePrefsMock(),
+      simplePrefs: new SimplePrefs(),
       broadcast: () => {},
       send: () => {}
     }, customOptions));
@@ -39,7 +39,7 @@ describe("PrefsProvider", () => {
     });
     it("should broadcast an action with the right properties", done => {
       setup({
-        simplePrefs: new SimplePrefsMock({foo: true}),
+        simplePrefs: new SimplePrefs({foo: true}),
         broadcast(action) {
           assert.equal(action.type, "PREF_CHANGED_RESPONSE", "should have the right action message");
           assert.equal(action.data.name, "foo", "should have the right data.name");
@@ -73,7 +73,7 @@ describe("PrefsProvider", () => {
     it("should respond to PREFS_REQUEST", done => {
       const worker = {};
       setup({
-        simplePrefs: new SimplePrefsMock({foo: true, bar: false}),
+        simplePrefs: new SimplePrefs({foo: true, bar: false}),
         send: (action, sentWorker) => {
           assert.equal(action.type, "PREFS_RESPONSE", "should have the right action type");
           assert.deepEqual(action.data, {foo: true, bar: false}, "should send all prefs");
@@ -84,7 +84,7 @@ describe("PrefsProvider", () => {
       prefsProvider.actionHandler({msg: {type: "PREFS_REQUEST"}, worker});
     });
     it("should change prefs on NOTIFY_UPDATE_PREF", () => {
-      setup({simplePrefs: new SimplePrefsMock({foo: true})});
+      setup({simplePrefs: new SimplePrefs({foo: true})});
       assert.isTrue(prefsProvider.simplePrefs.prefs.foo);
       prefsProvider.actionHandler({msg: {type: "NOTIFY_UPDATE_PREF", data: {name: "foo", value: false}}, worker: {}});
       assert.isFalse(prefsProvider.simplePrefs.prefs.foo, "should set prefs.foo to false");
