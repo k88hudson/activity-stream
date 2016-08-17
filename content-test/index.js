@@ -23,5 +23,5 @@ describe("ActivtyStreams", () => {
 
   // files.forEach(file => req(file));
   // In order to target specific files, comment out the above line and uncomment the following one.
-  require("./meta/Mocks.test.js");
+  require("./addon/PerfMeter.test.js");
 });
