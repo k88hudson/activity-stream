@@ -36,14 +36,21 @@ const NewTabPage = React.createClass({
   componentDidMount() {
     document.title = "New Tab";
     setFavicon("newtab-icon.svg");
+    console.log("FIRST MOUNT", window.performance.now());
   },
   componentWillReceiveProps(nextProps) {
     if (nextProps.isReady && !this.state.renderedOnce) {
       this.props.dispatch(actions.NotifyPerf("NEWTAB_RENDER"));
       this.setState({renderedOnce: true});
     }
+    console.log("BEFORE_RENDER", window.performance.now());
+
+  },
+  componentDidUpdate() {
+    console.log("AFTER_RENDER", window.performance.now());
   },
   render() {
+
     const props = this.props;
     const recommendationLabel = "Show Trending Highlights";
     const recommendationIcon = props.Spotlight.recommendationShown ? "check" : "   ";
