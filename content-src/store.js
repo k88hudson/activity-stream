@@ -32,7 +32,7 @@ if (__CONFIG__.LOGGING) {
     }));
   } else {
     middleware.push(store => next => action => {
-      console.log("action: " + action.type);
+      console.log("action: " + action.type, window.performance.now());
       next(action);
     });
   }
