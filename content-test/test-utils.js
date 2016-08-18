@@ -36,11 +36,37 @@ function overrideConsoleError(onError = () => {}) {
   };
 }
 
+
+/**
+ * defineGlobals - Allows you to set globals that are automatically removed/reset after tests
+ *
+ * @param  {obj} shims  An object of properties which should be added to global
+ */
+function defineGlobals(shims) {
+  const cachedValues = {};
+  before(() => {
+    Object.keys(shims).forEach(key => {
+      cachedValues[key] = global[key];
+      global[key] = shims[key];
+    });
+  });
+  after(() => {
+    Object.keys(shims).forEach(key => {
+      if (typeof cachedValues[key] !== "undefined") {
+        global[key] = cachedValues[key];
+      } else {
+        delete global[key];
+      }
+    });
+  });
+}
+
 module.exports = {
   rawMockData: mockData,
   mockData: Object.assign({}, mockData, selectNewTabSites(mockData)),
   createMockProvider,
   renderWithProvider,
   faker: require("test/faker"),
-  overrideConsoleError
+  overrideConsoleError,
+  defineGlobals
 };

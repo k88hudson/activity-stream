@@ -46,6 +46,8 @@ module.exports = function(config) {
         extensions: webpack.resolve.extensions,
         alias: Object.assign({}, webpack.resolve.alias, {
           "mocks": path.join(__dirname, "mocks"),
+          // This is necessary in order to be able to import
+          // files from the addon side.
           "chrome": "mocks/chrome.js",
           "sdk": "mocks/sdk"
         })

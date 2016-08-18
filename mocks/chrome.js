@@ -1,9 +1,11 @@
-const noop = () => {};
-
-module.exports = {
-  Cc: {},
-  Cu: {
-    import: noop
-  },
-  Ci: {}
-};
+class Chrome {
+  constructor() {
+    this.Cc = {};
+    this.Cu = {
+      import: sinon.spy()
+    };
+    this.Ci = {};
+  }
+}
+module.exports = new Chrome();
+module.Chrome = Chrome;

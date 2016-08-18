@@ -1,22 +1,17 @@
-const {PrefsProvider} = require("../../lib/PrefsProvider");
+const createPrefsProvider = require("inject!addons/PrefsProvider");
 const {assert} = require("chai");
-const EventEmitter = require("eventemitter2");
-
-class SimplePrefs extends EventEmitter {
-  constructor(prefs) {
-    super();
-    this.prefs = prefs || {};
-  }
-}
+const {SimplePrefs} = require("mocks/sdk/simple-prefs");
 
 describe("PrefsProvider", () => {
   let prefsProvider;
+  let simplePrefs;
 
   // This is just a utility to mock required options for PrefsProvider.
   // Override as necessary with the setup function.
   function setup(customOptions = {}) {
+    simplePrefs = new SimplePrefs();
+    const PrefsProvider = createPrefsProvider({"sdk/simple-prefs": simplePrefs});
     prefsProvider = new PrefsProvider(Object.assign({}, {
-      simplePrefs: new SimplePrefs(),
       broadcast: () => {},
       send: () => {}
     }, customOptions));
@@ -34,6 +29,7 @@ describe("PrefsProvider", () => {
     it("should add a listener for event changes", done => {
       setup({broadcast: () => done()});
       prefsProvider.init();
+      assert.ok(simplePrefs.calledWith("", prefsProvider.onPrefChange));
       assert.lengthOf(prefsProvider.simplePrefs.listeners(""), 1);
       prefsProvider.simplePrefs.emit("", "foo");
     });

@@ -1,16 +1,18 @@
-const EventEmitter = require("eventemitter2");
+const EventEmitter = require("mocks/_utils/EventEmitter");
 const faker = require("faker");
 
 /**
  * Tab
- * This is a mock for an individual tab. It will generate plausable
+ * This is an individual tab. It will generate plausable
  * properties (e.g. id, title, etc.) You may pass it custom properties
  * if you wish
  */
 class Tab extends EventEmitter {
   constructor(custom = {}) {
     super();
-    const props = Object.assign({
+
+    // Properties
+    const props = Object.keys(Object.assign({
       id: faker.random.uuid(),
       title: faker.hacker.phrase(),
       url: faker.internet.url(),
@@ -20,30 +22,37 @@ class Tab extends EventEmitter {
       isPinned: false,
       window: {},
       readyState: "complete"
-    }, custom);
+    }, custom));
     Object.keys(props).forEach(key => this[key] = props[key]);
+
+    // Methods
+    this.pin = sinon.spy();
+    this.pin = sinon.spy();
+    this.unpin = sinon.spy();
+    this.open = sinon.spy();
+    this.close = sinon.spy(callback => callback && setTimeout(callback, 1));
+    this.reload = sinon.spy();
+    this.activate = sinon.spy();
+    this.getThumbnail = sinon.spy();
+    this.attach = sinon.spy();
   }
-  pin() {}
-  unpin() {}
-  open() {}
-  close() {}
-  reload() {}
-  activate() {}
-  getThumbnail() {}
-  attach() {}
+
 }
 
 
 /**
  * Tabs
- * This is the mock for what gets returned from sdk/tabs
+ * This is a stub for sdk/tabs
  */
 class Tabs extends EventEmitter {
   constructor() {
-    const firstTab = new Tab();
     super();
+    const firstTab = new Tab();
     this._tabs = new Set([firstTab]);
     this._activeTab = firstTab;
+
+    // Methods
+    this.open = sinon.spy();
   }
   get activeTab() {
     return this._activeTab;
@@ -51,7 +60,6 @@ class Tabs extends EventEmitter {
   get length() {
     return this._tabs.length;
   }
-  open() {}
 }
 
 module.exports = new Tabs();

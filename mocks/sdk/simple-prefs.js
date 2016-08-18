@@ -1,4 +1,4 @@
-const EventEmitter = require("eventemitter2");
+const EventEmitter = require("mocks/_utils/EventEmitter");
 
 class SimplePrefs extends EventEmitter {
   constructor(prefs) {

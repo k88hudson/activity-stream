@@ -1,7 +1,9 @@
 const createPerfMeter = require("inject!addon/PerfMeter");
 const {SimplePrefs} = require("mocks/sdk/simple-prefs");
-const {Tabs, Tab} = require("mocks/sdk/tabs");
+const simplePrefs = require("sdk/simple-prefs");
 
+const {Tabs, Tab} = require("mocks/sdk/tabs");
+const {defineGlobals} = require("test/test-utils");
 const DEFAULT_OPTIONS = ["activity-streams.html"];
 const PREF_NAME = "performance.log";
 
@@ -12,14 +14,9 @@ describe("PerfMeter", () => {
     PerfMeter = createPerfMeter(overrides).PerfMeter;
     instance = new PerfMeter(options);
   }
-  function teardown() {
-    instance.uninit();
-  }
-
-  before(() => {global.Services = {obs: {notifyObservers: () => {}}}});
-  after(() => {delete global.Services;});
+  defineGlobals({Services: {obs: {notifyObservers: () => {}}}});
   beforeEach(() => setup());
-  afterEach(() => teardown());
+  afterEach(() => instance.uninit());
 
   it("should set ._trackableURLs", () => {
     assert.equal(instance._trackableURLs, DEFAULT_OPTIONS);
@@ -34,8 +31,7 @@ describe("PerfMeter", () => {
   it("should add listener on simplePrefs for performance.log", () => {
     const simplePrefs = new SimplePrefs();
     setup({"sdk/simple-prefs": simplePrefs});
-    assert.lengthOf(simplePrefs.listeners(PREF_NAME), 1, "should add one listener")
-    assert.equal(simplePrefs.listeners(PREF_NAME)[0], instance.onPrefChange, "listener is .onPrefChange");
+    assert.ok(simplePrefs.on.calledWith(PREF_NAME, instance.onPrefChange));
   });
 
   describe("#onOpen(tab)", () => {
@@ -48,19 +44,17 @@ describe("PerfMeter", () => {
       setup({"sdk/tabs": tabs});
     });
     it("should add a listener to tabs/open on instantiation", () => {
-      assert.lengthOf(tabs.listeners("open"), 1, "should add one listener");
+      assert.ok(tabs.on.calledWith("open", instance.onOpen));
     });
     it("should add tab to ._tabs", () => {
-      tabs.emit("open", tab);
-
+      instance.onOpen(tab);
       assert.property(instance._tabs, tab.id, "should add tab.id to ._tabs");
       assert.equal(instance._tabs[tab.id].tab, tab);
     });
     it("should add listeners for onReady, onClose", () => {
-      tabs.emit("open", tab);
-
-      assert.lengthOf(tab.listeners("ready"), 1, "should add a onReady listener");
-      assert.lengthOf(tab.listeners("close"), 1, "should add a onClose listener");
+      instance.onOpen(tab);
+      assert.ok(tab.on.calledWith("ready", instance.onReady));
+      assert.ok(tab.on.calledWith("close", instance.onClose));
     });
   });
 });
