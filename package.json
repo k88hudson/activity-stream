@@ -9,6 +9,7 @@
   "dependencies": {
     "DoublyLinkedList": "github:andrewrjones/doubly-linked-list-js",
     "classnames": "2.2.5",
+    "co": "^4.6.0",
     "fancy-dedupe": "0.1.0",
     "get-youtube-id": "1.0.0",
     "history": "2.1.2",
@@ -59,6 +60,7 @@
     "karma-mocha-reporter": "2.1.0",
     "karma-requirejs": "1.0.0",
     "karma-sinon": "1.0.5",
+    "karma-sinon-chai": "1.2.3",
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "1.8.0",
     "live-server": "1.1.0",
@@ -73,6 +75,7 @@
     "rimraf": "2.5.4",
     "sass-lint": "1.8.2",
     "sinon": "^1.17.5",
+    "sinon-chai": "2.8.0",
     "tippy-top-sites": "0.2.0",
     "webpack": "1.13.1",
     "webpack-env-loader-plugin": "0.1.4",

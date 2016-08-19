@@ -40,8 +40,9 @@ module.exports = function(config) {
     ],
     proxies: {"/favicons/": "/base/data/content/favicons/"},
     preprocessors: {"content-test/**/*.js": ["webpack", "sourcemap"]},
+    client: {chair: {includeStack: true}},
     webpack: {
-      devtool: "source-map",
+      devtool: "inline-source-map",
       resolve: {
         extensions: webpack.resolve.extensions,
         alias: Object.assign({}, webpack.resolve.alias, {

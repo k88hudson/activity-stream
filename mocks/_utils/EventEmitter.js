@@ -1,7 +1,7 @@
 class EventEmitter {
   constructor() {
     this.on = sinon.spy();
-    this.removeListener = sinon.spy();
+    this.off = sinon.spy();
   }
 }
 

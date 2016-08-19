@@ -2,6 +2,9 @@
 // const files = req.keys();
 const {overrideConsoleError} = require("test/test-utils");
 
+// This exposes sinon assertions to chai.assert
+sinon.assert.expose(assert, {prefix: ""});
+
 describe("ActivtyStreams", () => {
   let restore;
   let originalAlert;
@@ -23,5 +26,5 @@ describe("ActivtyStreams", () => {
 
   // files.forEach(file => req(file));
   // In order to target specific files, comment out the above line and uncomment the following one.
-  require("./addon/PerfMeter.test.js");
+  require("./addon/PrefsProvider.test.js");
 });

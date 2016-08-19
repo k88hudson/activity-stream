@@ -1,5 +1,4 @@
-const createPrefsProvider = require("inject!addons/PrefsProvider");
-const {assert} = require("chai");
+const createPrefsProvider = require("inject!addon/PrefsProvider");
 const {SimplePrefs} = require("mocks/sdk/simple-prefs");
 
 describe("PrefsProvider", () => {
@@ -8,82 +7,80 @@ describe("PrefsProvider", () => {
 
   // This is just a utility to mock required options for PrefsProvider.
   // Override as necessary with the setup function.
-  function setup(customOptions = {}) {
-    simplePrefs = new SimplePrefs();
-    const PrefsProvider = createPrefsProvider({"sdk/simple-prefs": simplePrefs});
-    prefsProvider = new PrefsProvider(Object.assign({}, {
-      broadcast: () => {},
-      send: () => {}
-    }, customOptions));
+  function setup(customPrefs={}) {
+    simplePrefs = new SimplePrefs(customPrefs);
+    const {PrefsProvider} = createPrefsProvider({"sdk/simple-prefs": simplePrefs});
+    prefsProvider = new PrefsProvider({
+      broadcast: sinon.spy(),
+      send: sinon.spy()
+    });
   }
 
   beforeEach(() => setup());
 
   it("should set instance properties", () => {
-    assert.property(prefsProvider, "simplePrefs");
     assert.property(prefsProvider, "broadcast");
     assert.property(prefsProvider, "send");
   });
 
   describe("#init", () => {
-    it("should add a listener for event changes", done => {
-      setup({broadcast: () => done()});
+    it("should add a listener for event changes", () => {
       prefsProvider.init();
-      assert.ok(simplePrefs.calledWith("", prefsProvider.onPrefChange));
-      assert.lengthOf(prefsProvider.simplePrefs.listeners(""), 1);
-      prefsProvider.simplePrefs.emit("", "foo");
-    });
-    it("should broadcast an action with the right properties", done => {
-      setup({
-        simplePrefs: new SimplePrefs({foo: true}),
-        broadcast(action) {
-          assert.equal(action.type, "PREF_CHANGED_RESPONSE", "should have the right action message");
-          assert.equal(action.data.name, "foo", "should have the right data.name");
-          assert.equal(action.data.value, false, "should have the right data.value");
-          done();
-        }
-      });
-      prefsProvider.init();
-      prefsProvider.simplePrefs.prefs.foo = false;
-      prefsProvider.simplePrefs.emit("", "foo");
+      assert.property(prefsProvider, "onPrefChange");
+      assert.isFunction(prefsProvider.onPrefChange, "prefsProvider.onPrefChange");
+      assert.calledWith(simplePrefs.on, "", prefsProvider.onPrefChange);
     });
   });
+
+  describe("onPrefChange", () => {
+    // Note: onPrefChange doesn't exist until init is called
+    beforeEach(() => prefsProvider.init());
+
+    it("should broadcast an action with the right properties", () => {
+      simplePrefs.prefs.foo = false;
+      prefsProvider.onPrefChange("foo");
+      assert.calledOnce(prefsProvider.broadcast);
+
+      const action = prefsProvider.broadcast.firstCall.args[0];
+      assert.equal(action.type, "PREF_CHANGED_RESPONSE", "should have the right action message");
+      assert.equal(action.data.name, "foo", "should have the right data.name");
+      assert.equal(action.data.value, false, "should have the right data.value");
+    });
+  });
+
 
   describe("#destroy", () => {
     it("should remove the event listener", () => {
       prefsProvider.init();
-      assert.lengthOf(prefsProvider.simplePrefs.listeners(""), 1);
+      assert.calledOnce(simplePrefs.on);
+      const callback = simplePrefs.on.firstCall.args[1];
       prefsProvider.destroy();
-      assert.lengthOf(prefsProvider.simplePrefs.listeners(""), 0);
+      assert.calledWith(simplePrefs.off, "", callback);
     });
   });
 
   describe("#actionHandler", () => {
-    it("should not do anything for other event types", () => {
-      const send = () => {
-        throw new Error("Called send method");
-      };
-      setup({send});
+    it("should not call .send for other event types", () => {
       prefsProvider.actionHandler({msg: {type: "HIGHLIGHTS_LINKS_REQUEST"}, worker: {}});
+      assert.callCount(prefsProvider.send, 0);
     });
-    it("should respond to PREFS_REQUEST", done => {
+    it("should respond to PREFS_REQUEST", () => {
+      setup({foo: true, bar: false});
       const worker = {};
-      setup({
-        simplePrefs: new SimplePrefs({foo: true, bar: false}),
-        send: (action, sentWorker) => {
-          assert.equal(action.type, "PREFS_RESPONSE", "should have the right action type");
-          assert.deepEqual(action.data, {foo: true, bar: false}, "should send all prefs");
-          assert.equal(sentWorker, worker, "should use the right worker");
-          done();
-        }
-      });
       prefsProvider.actionHandler({msg: {type: "PREFS_REQUEST"}, worker});
+      assert.calledOnce(prefsProvider.send);
+
+      const [action, sentWorker] = prefsProvider.send.firstCall.args;
+      assert.equal(action.type, "PREFS_RESPONSE", "should have the right action type");
+      assert.deepEqual(action.data, {foo: true, bar: false}, "should send all prefs");
+      assert.equal(sentWorker, worker, "should send to the right worker");
+
     });
     it("should change prefs on NOTIFY_UPDATE_PREF", () => {
-      setup({simplePrefs: new SimplePrefs({foo: true})});
-      assert.isTrue(prefsProvider.simplePrefs.prefs.foo);
+      setup({foo: true});
+      assert.isTrue(simplePrefs.prefs.foo);
       prefsProvider.actionHandler({msg: {type: "NOTIFY_UPDATE_PREF", data: {name: "foo", value: false}}, worker: {}});
-      assert.isFalse(prefsProvider.simplePrefs.prefs.foo, "should set prefs.foo to false");
+      assert.isFalse(simplePrefs.prefs.foo, "should set prefs.foo to false");
     });
   });
 });

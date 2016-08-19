@@ -17,7 +17,7 @@ exports.PrefsProvider = class PrefsProvider {
    *                                     Note: broadcast and send are defined on the ActivityStreams.js instance.
    */
   constructor(options) {
-    const {simplePrefs, broadcast, send} = options;
+    const {broadcast, send} = options;
     this.broadcast = broadcast;
     this.send = send;
   }
