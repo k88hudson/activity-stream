@@ -25,7 +25,6 @@ let plugins = [
 
 if (env === "production") {
   plugins = plugins.concat([
-    new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       test: /vendor/,
       compress: {warnings: false}
@@ -36,17 +35,16 @@ if (env === "production") {
 
 module.exports = {
   module: {
-    loaders: [
-      {test: /\.json$/, loader: "json"},
+    rules: [
       {
+        loader: "babel-loader",
         test: /\.jsx?$/,
-        exclude: /node_modules/,
-        loader: "babel"
+        exclude: /node_modules/
       }
     ]
   },
   resolve: {
-    extensions: ["", ".js", ".jsx"],
+    extensions: [".js", ".jsx"],
     alias: {
       "common": absolute("./common"),
       "components": absolute("./content-src/components"),

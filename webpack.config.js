@@ -12,7 +12,7 @@ let env = process.env.NODE_ENV || "development";
 
 if (env !== "test") {
   webpack_common.plugins.push(
-    new webpack.optimize.CommonsChunkPlugin("vendor", "vendor.bundle.js"));
+    new webpack.optimize.CommonsChunkPlugin({name: "vendor", filename: "vendor.bundle.js"}));
 }
 
 module.exports = {
