@@ -1,0 +1,8 @@
+{
+  "env": {
+    "node": false
+  },
+  "rules": {
+    "no-implicit-globals": 0
+  }
+}

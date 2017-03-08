@@ -76,7 +76,7 @@ scripts:
 
 # lint: Run eslint and sass-lint
   lint:
-    eslint: esw --ext=.js,.jsx,.json . .storybook
+    eslint: esw --ext=.js,.jsx,.json,.jsm . .storybook
     sasslint: sass-lint -v -q
 
 # strings-export: Copy newest en-US strings to strings repository

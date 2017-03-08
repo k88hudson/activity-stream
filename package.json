@@ -217,7 +217,7 @@
     "start:eslint": "npm run lint:eslint -- -w",
     "firefox": "npm run bundle:webpackAddon && jpm run -b nightly --prefs ./dev-prefs.json",
     "lint": "npm-run-all lint:*",
-    "lint:eslint": "esw --ext=.js,.jsx,.json . .storybook",
+    "lint:eslint": "esw --ext=.js,.jsx,.json,.jsm . .storybook",
     "lint:sasslint": "sass-lint -v -q",
     "strings-export": "node ./bin/strings-export.js ../activity-stream-l10n",
     "strings-import": "node ./bin/strings-import.js ../activity-stream-l10n",

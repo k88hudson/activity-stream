@@ -1,5 +1,5 @@
+/* exported ActivityStream */
 "use strict";
-
 
 class ActivityStream {
 
