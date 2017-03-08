@@ -5,4 +5,5 @@
 [features/activity-stream@mozilla.org] chrome.jar:
 % resource activity-stream %content/
   content/lib/ (./lib/*)
+  content/common/ (./common/*)
   content/data/ (./data/*)
