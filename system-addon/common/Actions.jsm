@@ -1,6 +1,16 @@
 "use strict";
 
-const actions = [
+class Actions extends Set {
+  type(key) {
+    if (this.has(key)) {
+      return key;
+    } else {
+      throw new Error(`${key} is not a defined action`);
+    }
+  }
+}
+
+const actions = new Actions([
   "HIGHLIGHTS_REQUEST",
   "HIGHLIGHTS_RESPONSE",
   "NOTIFY_BLOCK_URL",
@@ -15,9 +25,6 @@ const actions = [
   "SEARCH_SUGGESTIONS_RESPONSE",
   "TOP_FRECENT_SITES_REQUEST",
   "TOP_FRECENT_SITES_RESPONSE",
-].reduce((prev, next) => {
-  prev[next] = next;
-  return prev;
-}, {});
+]);
 
 this.EXPORTED_SYMBOLS = ["actions"];

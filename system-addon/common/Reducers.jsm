@@ -1,6 +1,6 @@
 "use strict";
 
-const {actions} = Components.utils.import("resource://activity-stream/common/Actions.jsm");
+Components.utils.import("resource://activity-stream/common/Actions.jsm");
 
 const INITIAL_STATE = {
   Prefs: {
@@ -37,7 +37,7 @@ const INITIAL_STATE = {
 function Prefs(prevState = INITIAL_STATE.Prefs, action) {
   const state = Object.assign({}, prevState);
   switch (action.type) {
-    case actions.PREFS_RESPONSE:
+    case actions.type("PREFS_RESPONSE"):
       if (action.error) {
         state.error = action.data;
       } else {
@@ -45,7 +45,7 @@ function Prefs(prevState = INITIAL_STATE.Prefs, action) {
         state.error = false;
       }
       return state;
-    case actions.PREF_CHANGED_RESPONSE:
+    case actions.type("PREF_CHANGED_RESPONSE"):
       state.prefs[action.data.name] = action.data.value;
       return state;
     default:
@@ -60,21 +60,21 @@ function Search(prevState = INITIAL_STATE.Search, action) {
     return Object.assign({}, prevState, state);
   }
   switch (action.type) {
-    case actions.SEARCH_STATE_UPDATED:
+    case actions.type("SEARCH_STATE_UPDATED"):
       state.currentEngine = JSON.parse(action.data.currentEngine);
       state.engines = action.data.engines.map(engine => ({
         name: engine.name,
         icon: engine.iconBuffer
       }));
       break;
-    case actions.NOTIFY_UPDATE_SEARCH_STRING:
+    case actions.type("NOTIFY_UPDATE_SEARCH_STRING"):
       state.searchString = action.data.searchString;
       break;
-    case actions.SEARCH_SUGGESTIONS_RESPONSE:
+    case actions.type("SEARCH_SUGGESTIONS_RESPONSE"):
       state.formHistory = action.data.formHistory || [];
       state.suggestions = action.data.suggestions || [];
       break;
-    case actions.SEARCH_CYCLE_CURRENT_ENGINE_RESPONSE:
+    case actions.type("SEARCH_CYCLE_CURRENT_ENGINE_RESPONSE"):
       state.currentEngine = action.data.currentEngine;
       break;
     default:
@@ -88,10 +88,10 @@ function setRowsOrError(requestType, responseType, querySize) {
     const state = {};
     const meta = action.meta || {};
     switch (action.type) {
-      case actions[requestType]:
+      case actions.type(requestType):
         state.isLoading = true;
         break;
-      case actions[responseType]:
+      case actions.type(responseType):
         state.isLoading = false;
         if (action.error) {
           state.rows = meta.append ? prevState.rows : [];
@@ -111,7 +111,7 @@ function setRowsOrError(requestType, responseType, querySize) {
           }
         }
         break;
-      case actions.RECEIVE_BOOKMARK_ADDED:
+      case actions.type("RECEIVE_BOOKMARK_ADDED"):
         state.rows = prevState.rows.map(site => {
           if (site.url === action.data.url) {
             const {bookmarkGuid, bookmarkTitle, lastModified} = action.data;
@@ -121,7 +121,7 @@ function setRowsOrError(requestType, responseType, querySize) {
           return site;
         });
         break;
-      case actions.RECEIVE_BOOKMARK_REMOVED:
+      case actions.type("RECEIVE_BOOKMARK_REMOVED"):
         state.rows = prevState.rows.map(site => {
           if (site.url === action.data.url) {
             const frecency = typeof action.data.frecency !== "undefined" ? action.data.frecency : site.frecency;
@@ -134,8 +134,8 @@ function setRowsOrError(requestType, responseType, querySize) {
           return site;
         });
         break;
-      case actions.NOTIFY_BLOCK_URL:
-      case actions.NOTIFY_HISTORY_DELETE:
+      case actions.type("NOTIFY_BLOCK_URL"):
+      case actions.type("NOTIFY_HISTORY_DELETE"):
         state.rows = prevState.rows.filter(val => val.url !== action.data);
         break;
       default:

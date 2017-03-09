@@ -1,4 +1,4 @@
-
+/*eslint-disable*/
 var redux =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
