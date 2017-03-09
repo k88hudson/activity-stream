@@ -5,7 +5,9 @@
 
 const {utils: Cu} = Components;
 const {Store} = Cu.import("resource://activity-stream/lib/Store.jsm", {});
+
 const {MessageManager} = Cu.import("resource://activity-stream/lib/MessageManager.jsm", {});
+const {NewTabInit} = Cu.import("resource://activity-stream/lib/NewTabInit.jsm", {});
 
 class ActivityStream {
 
@@ -25,7 +27,8 @@ class ActivityStream {
   init() {
     this.initialized = true;
     this.store.register([
-      new MessageManager(this.options.newTabURL)
+      new MessageManager(this.options.newTabURL),
+      new NewTabInit()
     ]);
     this.store.dispatch({type: "INIT"});
   }

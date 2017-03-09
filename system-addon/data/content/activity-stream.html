@@ -7,6 +7,29 @@
   <body>
     <div id="root">
       <h1>New Tab</h1>
+      <h2>Top Sites</h2>
+      <ul id="top-sites"></ul>
     </div>
+    <script>
+      function createTopSites(sites, container) {
+        return sites.map(site => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = site.url;
+          a.textContent = site.title;
+          li.appendChild(a);
+          container.appendChild(li);
+        });
+      }
+      const topSitesEl = document.getElementById("top-sites");
+      addMessageListener("ActivityStream:MainToContent", function(msg) {
+        const action = msg.data;
+        switch (action.type) {
+          case "NEWTAB_INITIAL_STATE":
+            createTopSites(action.data.TopSites.rows, topSitesEl);
+            break;
+        }
+      });
+    </script>
   </body>
 </html>
