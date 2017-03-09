@@ -4,10 +4,8 @@
 "use strict";
 
 const {utils: Cu} = Components;
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-XPCOMUtils.defineLazyModuleGetter(this, "createStore",
-  "resource://activity-stream/lib/Store.jsm");
+const {createStore} = Cu.import("resource://activity-stream/lib/Store.jsm", {});
+const {FeedController} = Cu.import("resource://activity-stream/lib/FeedController.jsm", {});
 
 class ActivityStream {
 
@@ -22,13 +20,19 @@ class ActivityStream {
   constructor(options) {
     this.initialized = false;
     this.options = options;
+    this.store = null;
+    this.fc = null;
   }
   init() {
-    const store = createStore();
-    const state = store.getState();
     this.initialized = true;
+    this.store = createStore();
+    this.fc = new FeedController(this.store);
+    this.store.dispatch({type: "INIT"});
   }
   uninit() {
+    this.store.dispatch({type: "UNINIT"});
+    this.store = null;
+    this.fc = null;
     this.initialized = false;
   }
 }

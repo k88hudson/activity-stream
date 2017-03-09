@@ -1,6 +1,6 @@
 "use strict";
 
-Components.utils.import("resource://activity-stream/common/Actions.jsm");
+const {actions} = Components.utils.import("resource://activity-stream/common/Actions.jsm", {});
 
 const INITIAL_STATE = {
   Prefs: {
@@ -147,11 +147,12 @@ function setRowsOrError(requestType, responseType, querySize) {
 
 const Reducers = {
   TopSites: setRowsOrError("TOP_FRECENT_SITES_REQUEST", "TOP_FRECENT_SITES_RESPONSE"),
-  Highlights: setRowsOrError("HIGHLIGHTS_REQUEST", "HIGHLIGHTS_RESPONSE"),
   Prefs,
   Search
 };
 
+this.Reducers = Reducers;
+this.INITIAL_STATE = INITIAL_STATE;
 this.EXPORTED_SYMBOLS = [
   "Reducers",
   "INITIAL_STATE"

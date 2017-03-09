@@ -11,8 +11,6 @@ class Actions extends Set {
 }
 
 const actions = new Actions([
-  "HIGHLIGHTS_REQUEST",
-  "HIGHLIGHTS_RESPONSE",
   "NOTIFY_BLOCK_URL",
   "NOTIFY_HISTORY_DELETE",
   "NOTIFY_UPDATE_SEARCH_STRING",
@@ -27,4 +25,5 @@ const actions = new Actions([
   "TOP_FRECENT_SITES_RESPONSE",
 ]);
 
+this.actions = actions;
 this.EXPORTED_SYMBOLS = ["actions"];
