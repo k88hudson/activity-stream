@@ -8,9 +8,22 @@ XPCOMUtils.defineLazyModuleGetter(this, "redux",
 XPCOMUtils.defineLazyModuleGetter(this, "Reducers",
   "resource://activity-stream/common/Reducers.jsm");
 
-function createStore() {
-  return redux.createStore(redux.combineReducers(Reducers));
+class Store {
+  constructor() {
+    constructor(store) {
+      this.store = redux.createStore(redux.combineReducers(Reducers));
+      this.subscribers = new Set();
+      this.store.subscribe(action => this.subscribers.forEach(s => s.onAction(action)));
+    }
+    register(subscriber) {
+      subscriber.store = this.store;
+      this.subscribers.add(subscribers);
+    }
+    clear() {
+      this.subscribers.clear();
+    }
+  }
 }
 
-this.createStore = createStore;
-this.EXPORTED_SYMBOLS = ["createStore"];
+this.Store = Store;
+this.EXPORTED_SYMBOLS = ["Store"];

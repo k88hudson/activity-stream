@@ -4,8 +4,8 @@
 "use strict";
 
 const {utils: Cu} = Components;
-const {createStore} = Cu.import("resource://activity-stream/lib/Store.jsm", {});
-const {FeedController} = Cu.import("resource://activity-stream/lib/FeedController.jsm", {});
+const {Store} = Cu.import("resource://activity-stream/lib/Store.jsm", {});
+const {MessageManager} = Cu.import("resource://activity-stream/lib/MessageManager.jsm", {});
 
 class ActivityStream {
 
@@ -20,19 +20,16 @@ class ActivityStream {
   constructor(options) {
     this.initialized = false;
     this.options = options;
-    this.store = null;
-    this.fc = null;
+    this.store = createStore();
   }
   init() {
     this.initialized = true;
-    this.store = createStore();
-    this.fc = new FeedController(this.store);
+    this.store.register(new MessageManager());
     this.store.dispatch({type: "INIT"});
   }
   uninit() {
     this.store.dispatch({type: "UNINIT"});
-    this.store = null;
-    this.fc = null;
+    this.store.clear();
     this.initialized = false;
   }
 }
