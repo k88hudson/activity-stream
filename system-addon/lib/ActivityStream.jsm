@@ -20,11 +20,13 @@ class ActivityStream {
   constructor(options) {
     this.initialized = false;
     this.options = options;
-    this.store = createStore();
+    this.store = new Store();
   }
   init() {
     this.initialized = true;
-    this.store.register(new MessageManager());
+    this.store.register([
+      new MessageManager(this.options.newTabURL)
+    ]);
     this.store.dispatch({type: "INIT"});
   }
   uninit() {
