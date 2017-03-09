@@ -6,4 +6,5 @@
 % resource activity-stream %content/
   content/lib/ (./lib/*)
   content/common/ (./common/*)
+  content/vendor/ (./vendor/*)
   content/data/ (./data/*)

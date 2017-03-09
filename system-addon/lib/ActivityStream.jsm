@@ -3,6 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
+const {utils: Cu} = Components;
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetter(this, "createStore",
+  "resource://activity-stream/lib/Store.jsm");
+
 class ActivityStream {
 
   /**
@@ -18,6 +24,8 @@ class ActivityStream {
     this.options = options;
   }
   init() {
+    const store = createStore();
+    const state = store.getState();
     this.initialized = true;
   }
   uninit() {
