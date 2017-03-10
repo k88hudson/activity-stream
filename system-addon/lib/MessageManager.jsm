@@ -1,9 +1,13 @@
-/* globals uuidgen */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* globals AboutNewTab, uuidgen, RemotePages, XPCOMUtils */
 
 "use strict";
 const {utils: Cu} = Components;
-const {RemotePageManager} = Cu.import("resource://gre/modules/RemotePageManager.jsm");
-const {XPCOMUtils} = Cu.import("resource://gre/modules/XPCOMUtils.jsm", {});
+
+Cu.import("resource://gre/modules/RemotePageManager.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 XPCOMUtils.defineLazyServiceGetter(this, "uuidgen",
   "@mozilla.org/uuid-generator;1",
@@ -11,6 +15,8 @@ XPCOMUtils.defineLazyServiceGetter(this, "uuidgen",
 
 XPCOMUtils.defineLazyModuleGetter(this, "AboutNewTab",
   "resource:///modules/AboutNewTab.jsm");
+
+const ABOUT_NEW_TAB_URL = "about:newtab";
 
 class MessageManager {
   constructor(pageURL) {
@@ -25,8 +31,24 @@ class MessageManager {
     this.onNewTabUnload = this.onNewTabUnload.bind(this);
   }
 
+  /**
+   * onAction - This method is called by a Store instance whenever an action is fired.
+   *
+   * @param  {object} action Redux action
+   */
   onAction(action) {
-    // Send to a specific target
+    // This section handles lifecycle methods for MessageManager.
+    switch(action.type) {
+      case "INIT":
+        this.createChannel();
+        break;
+      case "UNINIT":
+        this.destroyChannel();
+        break;
+    }
+
+    // This section handles message routing.
+    // Send to a specific target (i.e. content process) by id.
     if (action.meta && action.meta.send === this.MAIN_TO_CONTENT_MESSAGE_NAME) {
       const target = this.targets.get(action.meta.target);
       if (!target) {
@@ -35,21 +57,18 @@ class MessageManager {
       }
       target.sendAsyncMessage(this.MAIN_TO_CONTENT_MESSAGE_NAME, action);
     }
+    // Send to all targets in the channel
     else if (action.meta && action.meta.broadcast === this.MAIN_TO_CONTENT_MESSAGE_NAME) {
       this.channel.sendAsyncMessage(this.MAIN_TO_CONTENT_MESSAGE_NAME, action);
     }
-    switch(action.type) {
-      case "INIT":
-        AboutNewTab.override();
-        this.addChannel();
-        break;
-      case "UNINIT":
-        this.removeChannel();
-        AboutNewTab.reset();
-        break;
-    }
   }
 
+  /**
+   * getIdByTarget - Retrieve the id of a message target, if it exists in this.targets
+   *
+   * @param  {obj} targetObj A message target
+   * @return {string} The unique id of the target, if it exists.
+   */
   getIdByTarget(targetObj) {
     for (let [id, target] of this.targets) {
       if (targetObj === target) {
@@ -58,32 +77,63 @@ class MessageManager {
     }
   }
 
+  /**
+   * addTarget - Add a message target to this.targets
+   *
+   * @param  {object} target A message target
+   * @return {string} The unique id of the target
+   */
   addTarget(target) {
     const id = uuidgen.generateUUID().toString();
     this.targets.set(id, target);
     return id;
   }
 
-  addChannel() {
-    RemotePageManager.addRemotePageListener(this.pageURL, channel => {
-      channel.addMessageListener("RemotePage:Load", this.onNewTabLoad);
-      channel.addMessageListener("RemotePage:Unload", this.onNewTabUnload);
-      channel.addMessageListener(this.CONTENT_TO_MAIN_MESSAGE_NAME, this.onMessage);
-    });
+  /**
+   * createChannel - Create RemotePages channel to establishing message passing
+   *                 between the main process and child pages
+   */
+  createChannel() {
+    //  RemotePageManager must be disabled for about:newtab, since only one can exist at once
+    if (this.pageURL === ABOUT_NEW_TAB_URL) {
+      AboutNewTab.override();
+    }
+    this.channel = new RemotePages(this.pageURL);
+    this.channel.addMessageListener("RemotePage:Load", this.onNewTabLoad);
+    this.channel.addMessageListener("RemotePage:Unload", this.onNewTabUnload);
+    this.channel.addMessageListener(this.CONTENT_TO_MAIN_MESSAGE_NAME, this.onMessage);
   }
 
-  removeChannel() {
+  /**
+   * destroyChannel - Destroys the RemotePages channel
+   *
+   * @return {type}  description
+   */
+  destroyChannel() {
     this.targets.clear();
-    RemotePageManager.removeRemotePageListener(this.pageURL);
+    this.channel.destroy();
     this.channel = null;
+    if (this.pageURL === ABOUT_NEW_TAB_URL) {
+      AboutNewTab.reset();
+    }
   }
 
+  /**
+   * onNewTabLoad - Handler for special RemotePage:Load message fired by RemotePages
+   *
+   * @param  {obj} msg The messsage from a page that was just loaded
+   */
   onNewTabLoad(msg) {
     const target = msg.target;
     const id = this.getIdByTarget(target) || this.addTarget(target);
     this.store.dispatch({type: "NEWTAB_LOAD", data: id});
   }
 
+  /**
+   * onNewTabUnloadLoad - Handler for special RemotePage:Unload message fired by RemotePages
+   *
+   * @param  {obj} msg The messsage from a page that was just unloaded
+   */
   onNewTabUnload(msg) {
     const target = msg.target;
     const id = this.getIdByTarget(target);
@@ -91,6 +141,14 @@ class MessageManager {
     this.store.dispatch({type: "NEWTAB_UNLOAD", data: id});
   }
 
+  /**
+   * onMessage - Handles custom messages from content. It expects all messages to
+   *             be formatted as Redux actions, and dispatches them to this.store
+   *
+   * @param  {obj} msg A custom message from content
+   * @param  {obj} msg.action A Redux action (e.g. {type: "HELLO_WORLD"})
+   * @param  {obj} msg.target A message target
+   */
   onMessage(msg) {
     const action = msg.data;
     if (!action || !action.type) {
@@ -98,9 +156,9 @@ class MessageManager {
       return;
     }
     const meta = action.meta ? Object.assign({}, action.meta) : {};
-    let id = this.getIdByTarget(target) || this.addTarget(target);
+    const id = this.getIdByTarget(target) || this.addTarget(target);
     meta.target = id;
-    this.store.dispatch(msg.data);
+    this.store.dispatch(Object.assign({}, action, {meta}));
   }
 }
 
