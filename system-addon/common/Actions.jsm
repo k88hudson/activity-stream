@@ -6,7 +6,7 @@
 const MAIN_MESSAGE_TYPE = "ActivityStream:Main";
 const CONTENT_MESSAGE_TYPE = "ActivityStream:Content";
 
-const actionTypes = [
+this.actionTypes = [
   "INIT",
   "UNINIT",
   "NEW_TAB_INITIAL_STATE",
@@ -85,8 +85,6 @@ function SendToContent(action, target) {
     toTarget: target
   });
 }
-
-this.actionTypes = actionTypes;
 
 this.actionCreators = {
   SendToMain,
