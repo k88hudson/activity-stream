@@ -8,6 +8,14 @@
 main {
   margin: auto;
 
+  @media (min-width: $break-point-smallest) {
+    width: $wrapper-max-width-smallest;
+  }
+
+  @media (min-width: $break-point-small) {
+    width: $wrapper-max-width-small;
+  }
+
   @media (min-width: $break-point-medium) {
     width: $wrapper-max-width-medium;
   }
