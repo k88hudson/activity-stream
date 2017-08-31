@@ -78,10 +78,11 @@ class TopSite extends React.Component {
     this.props.onEdit(this.props.index);
   }
   render() {
-    const {link, index, dispatch, editMode} = this.props;
-    const isContextMenuOpen = this.state.showContextMenu && this.state.activeTile === index;
-    const title = link.label || link.hostname;
-    const topSiteOuterClassName = `top-site-outer${isContextMenuOpen ? " active" : ""}`;
+    const {props} = this;
+    const {link} = props;
+    const isContextMenuOpen = this.state.showContextMenu && this.state.activeTile === props.index;
+    const title = link.label || link.hostname || "";
+    const topSiteOuterClassName = `top-site-outer${isContextMenuOpen ? " active" : ""}${props.placeholder ? " placeholder" : ""}`;
     const {tippyTopIcon} = link;
     let imageClassName;
     let imageStyle;
@@ -96,7 +97,7 @@ class TopSite extends React.Component {
       imageStyle = {backgroundImage: link.screenshot ? `url(${link.screenshot})` : "none"};
     }
     return (<li className={topSiteOuterClassName} key={link.guid || link.url}>
-        <a href={link.url} onClick={this.onLinkClick}>
+        <a href={link.url} onClick={!props.placeholder && this.onLinkClick}>
           <div className="tile" aria-hidden={true}>
               <span className="letter-fallback">{title[0]}</span>
               <div className={imageClassName} style={imageStyle} />
@@ -106,14 +107,14 @@ class TopSite extends React.Component {
             <span dir="auto">{title}</span>
           </div>
         </a>
-        {!editMode &&
+        {!props.placeholder && !props.editMode &&
           <div>
             <button className="context-menu-button icon" onClick={this.onMenuButtonClick}>
               <span className="sr-only">{`Open context menu for ${title}`}</span>
             </button>
             <LinkMenu
-              dispatch={dispatch}
-              index={index}
+              dispatch={props.dispatch}
+              index={props.index}
               onUpdate={this.onMenuUpdate}
               options={TOP_SITES_CONTEXT_MENU_OPTIONS}
               site={link}
@@ -121,7 +122,7 @@ class TopSite extends React.Component {
               visible={isContextMenuOpen} />
           </div>
         }
-        {editMode &&
+        {!props.placeholder && props.editMode &&
           <div className="edit-menu">
             <button
               className={`icon icon-${link.isPinned ? "unpin" : "pin"}`}
@@ -143,6 +144,7 @@ class TopSite extends React.Component {
 
 TopSite.defaultProps = {
   editMode: false,
+  link: {},
   onEdit() {}
 };
 

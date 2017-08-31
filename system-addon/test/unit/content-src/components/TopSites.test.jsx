@@ -188,8 +188,8 @@ describe("<TopSites>", () => {
     const wrapper = shallow(<TopSites {...DEFAULT_PROPS} TopSites={{rows}} />);
 
     const links = wrapper.find(TopSite);
-    assert.lengthOf(links, 2);
-    links.forEach((link, i) => assert.equal(link.props().link.url, rows[i].url));
+
+    rows.forEach((row, i) => assert.equal(links.nodes[i].props.link.url, row.url));
   });
   it("should slice the TopSite rows to the TopSitesCount pref", () => {
     const rows = [{url: "https://foo.com"}, {url: "https://bar.com"}, {url: "https://baz.com"}, {url: "https://bam.com"}, {url: "https://zoom.com"}, {url: "https://woo.com"}, {url: "https://eh.com"}];
@@ -198,6 +198,18 @@ describe("<TopSites>", () => {
 
     const links = wrapper.find(TopSite);
     assert.lengthOf(links, TOP_SITES_DEFAULT_LENGTH);
+  });
+  it("should fill with placeholders if TopSites rows is less than TopSitesCount", () => {
+    const rows = [{url: "https://foo.com"}, {url: "https://bar.com"}];
+    const topSitesCount = 5;
+
+    const wrapper = shallow(<TopSites {...DEFAULT_PROPS} TopSites={{rows}} TopSitesCount={topSitesCount} />);
+
+    const links = wrapper.find(TopSite);
+
+    assert.lengthOf(links, topSitesCount, "total top sites");
+    const placeholders = links.nodes.filter(node => node.props.placeholder);
+    assert.lengthOf(placeholders, 3, "placeholders");
   });
 });
 
@@ -302,6 +314,22 @@ describe("<TopSite>", () => {
     const tippyTop = wrapper.find(".tippy-top-icon");
     assert.propertyVal(tippyTop.props().style, "backgroundImage", "url(foo.png)");
     assert.propertyVal(tippyTop.props().style, "backgroundColor", "#FFFFFF");
+  });
+
+  describe("placeholder", () => {
+    it("should render a TopSite with placeholder={true} without throwing errors", () => {
+      assert.doesNotThrow(() => {
+        shallow(<TopSite placeholder={true} />);
+      });
+    });
+    it("should have a placeholder class", () => {
+      const wrapper = shallow(<TopSite placeholder={true} />);
+      assert.isTrue(wrapper.find(".top-site-outer").hasClass("placeholder"));
+    });
+    it("should not render a LinkMenu", () => {
+      const wrapper = shallow(<TopSite placeholder={true} />);
+      assert.lengthOf(wrapper.find(LinkMenu), 0);
+    });
   });
 
   describe("#trackClick", () => {
