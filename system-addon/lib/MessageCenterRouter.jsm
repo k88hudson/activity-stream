@@ -1,6 +1,9 @@
 const INCOMING_MESSAGE_NAME = "MessageCenter:child-to-parent";
 const OUTGOING_MESSAGE_NAME = "MessageCenter:parent-to-child";
 
+ChromeUtils.defineModuleGetter(this, "MessageCenterTargeting",
+  "resource://activity-stream/lib/MessageCenterTargeting.jsm");
+
 const FAKE_MESSAGES = [
   {
     id: "ONBOARDING_1",
@@ -18,6 +21,7 @@ const FAKE_MESSAGES = [
   {
     id: "ONBOARDING_2",
     template: "simple_snippet",
+    filter: "!isDefaultBrowser",
     content: {
       title: "Make Firefox your go-to-browser",
       body: "It doesn't take much to get the most from Firefox. Just set Firefox as your default browser and put control, customization, and protection on autopilot."
@@ -30,18 +34,27 @@ const FAKE_MESSAGES = [
       title: "Did you know?",
       body: "All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood."
     }
+  },
+  {
+    id: "GET_FXA",
+    template: "simple_snippet",
+    filter: "!hasFxAccount",
+    content: {
+      title: "Get a firefox account today!",
+      body: "Thy are very useful!"
+    }
   }
 ];
 
 /**
- * getRandomItemFromArray
+ * removeRandomItemFromArray - Removes a random item from the array and returns it.
  *
  * @param {Array} arr An array of items
  * @returns one of the items in the array
  */
-function getRandomItemFromArray(arr) {
+function removeRandomItemFromArray(arr) {
   const index = Math.floor(Math.random() * arr.length);
-  return arr[index];
+  return arr.splice(index, 1)[0];
 }
 
 /**
@@ -107,8 +120,15 @@ class _MessageCenterRouter {
 
   async sendNextMessage(target, id) {
     let message;
-    await this.setState(state => {
-      message = getRandomItemFromArray(state.messages.filter(item => item.id !== state.currentId && !state.blockList[item.id]));
+    await this.setState(async state => {
+      let messagesArray = state.messages.filter(item => item.id !== state.currentId && !state.blockList[item.id]);
+      while (!message && messagesArray.length) {
+        const newMessage = removeRandomItemFromArray(messagesArray);
+        const isMatch = await MessageCenterTargeting.isMatch(newMessage);
+        if (isMatch) {
+          message = newMessage;
+        }
+      }
       return {currentId: message ? message.id : null};
     });
     if (message) {
