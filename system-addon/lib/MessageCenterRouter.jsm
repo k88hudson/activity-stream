@@ -40,8 +40,8 @@ const FAKE_MESSAGES = [
     template: "simple_snippet",
     filter: "!hasFxAccount",
     content: {
-      title: "Get a firefox account today!",
-      body: "Thy are very useful!"
+      title: "Sync all your stuff with a Firefox Account",
+      body: "It's really cool, you should totally try it out"
     }
   }
 ];
@@ -105,8 +105,8 @@ class _MessageCenterRouter {
     this.initialized = false;
   }
 
-  setState(callbackOrObj) {
-    const newState = (typeof callbackOrObj === "function") ? callbackOrObj(this.state) : callbackOrObj;
+  async setState(callbackOrObj) {
+    const newState = (typeof callbackOrObj === "function") ? await callbackOrObj(this.state) : callbackOrObj;
     this._state = Object.assign({}, this.state, newState);
     return new Promise(resolve => {
       this._onStateChanged(this.state);
@@ -120,6 +120,7 @@ class _MessageCenterRouter {
 
   async sendNextMessage(target, id) {
     let message;
+
     await this.setState(async state => {
       let messagesArray = state.messages.filter(item => item.id !== state.currentId && !state.blockList[item.id]);
       while (!message && messagesArray.length) {
@@ -131,6 +132,7 @@ class _MessageCenterRouter {
       }
       return {currentId: message ? message.id : null};
     });
+
     if (message) {
       target.sendAsyncMessage(OUTGOING_MESSAGE_NAME, {type: "SET_MESSAGE", data: message});
     } else {

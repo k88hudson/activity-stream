@@ -7,7 +7,18 @@ ChromeUtils.defineModuleGetter(this, "ProfileAge",
 
 const FXA_USERNAME_PREF = "services.sync.username";
 
-const RULES = {
+/**
+ * removeRandomItemFromArray - Removes a random item from the array and returns it.
+ *
+ * @param {Array} arr An array of items
+ * @returns one of the items in the array
+ */
+function removeRandomItemFromArray(arr) {
+  const index = Math.floor(Math.random() * arr.length);
+  return arr.splice(index, 1)[0];
+}
+
+const TargetingGetters = {
   get profileAge() {
     const profileAge = new ProfileAge(null, null);
     return {
@@ -27,16 +38,23 @@ const RULES = {
     }
   }
 };
-
-this.RulesConfig = RULES;
+this.TargetingGetters = TargetingGetters;
 
 this.MessageCenterTargeting = {
-  isMatch(message, context = RULES) {
-    if (!message.filter) {
-      return Promise.resolve(true);
+  isMatch(filterExpression, context = TargetingGetters) {
+    return FilterExpressions.eval(filterExpression, context);
+  },
+  async findMatchingItem(originalArray, options = DEFAULT_MATCHING_ITEM_OPTIONS) {
+    const arrayOfItems = [...originalArray];
+    let match;
+    while (!match && arrayOfItems.length) {
+      const candidate = removeRandomItemFromArray(arrayOfItems);
+      if (await this.isMatch(candidate)) {
+        match = candidate;
+      }
     }
-    return FilterExpressions.eval(message.filter, context);
+    return match;
   }
 };
 
-this.EXPORTED_SYMBOLS = ["RulesConfig", "MessageCenterTargeting"];
+this.EXPORTED_SYMBOLS = ["TargetingGetters", "MessageCenterTargeting"];

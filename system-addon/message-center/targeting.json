@@ -1,0 +1,30 @@
+[
+  {
+    "id": "profileAge",
+    "title": "Profile Age",
+    "description": "An object containing information about the Profile Age",
+    "type": "object",
+    "properties": {
+      "created": {
+        "description": "The date the profile was created",
+        "type": "integer"
+      },
+      "reset": {
+        "description": "The date the profile was reset",
+        "type": "integer"
+      }
+    }
+  },
+  {
+    "id": "hasFxAccount",
+    "title": "Has Firefox Account",
+    "description": "Is the user is signed into a Firefox Account?",
+    "type": "boolean"
+  },
+  {
+    "id": "isDefaultBrowser",
+    "title": "Is Default Browser",
+    "description": "Is Firefox set to the user's default browser?",
+    "type": "boolean"
+  }
+]

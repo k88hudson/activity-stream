@@ -26,7 +26,7 @@ const FAKE_MESSAGES = [
 ];
 const FAKE_MESSAGE_IDS = FAKE_MESSAGES.map(message => message.id);
 
-describe("MessageCenterRouter", () => {
+describe.only("MessageCenterRouter", () => {
   let Router;
   let channel;
   beforeEach(() => {
