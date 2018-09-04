@@ -16,7 +16,7 @@ export class ASRouterAdmin extends React.PureComponent {
   }
 
   componentWillMount() {
-    const endpoint = ASRouterUtils.getEndpoint();
+    const endpoint = ASRouterUtils.getPreviewEndpoint();
     ASRouterUtils.sendMessage({type: "ADMIN_CONNECT_STATE", data: {endpoint}});
     ASRouterUtils.addListener(this.onMessage);
   }

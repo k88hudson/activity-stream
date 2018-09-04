@@ -11,6 +11,7 @@ import {SimpleSnippet} from "./templates/SimpleSnippet/SimpleSnippet";
 
 const INCOMING_MESSAGE_NAME = "ASRouter:parent-to-child";
 const OUTGOING_MESSAGE_NAME = "ASRouter:child-to-parent";
+const ASR_CONTAINER_ID = "asr-newtab-container";
 
 export const ASRouterUtils = {
   addListener(listener) {
@@ -40,9 +41,6 @@ export const ASRouterUtils = {
   unblockBundle(bundle) {
     ASRouterUtils.sendMessage({type: "UNBLOCK_BUNDLE", data: {bundle}});
   },
-  getNextMessage() {
-    ASRouterUtils.sendMessage({type: "GET_NEXT_MESSAGE"});
-  },
   overrideMessage(id) {
     ASRouterUtils.sendMessage({type: "OVERRIDE_MESSAGE", data: {id}});
   },
@@ -50,7 +48,7 @@ export const ASRouterUtils = {
     const payload = ac.ASRouterUserEvent(ping);
     global.RPMSendAsyncMessage(AS_GENERAL_OUTGOING_MESSAGE_NAME, payload);
   },
-  getEndpoint() {
+  getPreviewEndpoint() {
     if (window.location.href.includes("endpoint")) {
       const params = new URLSearchParams(window.location.href.slice(window.location.href.indexOf("endpoint")));
       try {
@@ -192,7 +190,7 @@ export class ASRouterUISurface extends React.PureComponent {
   }
 
   componentWillMount() {
-    const endpoint = ASRouterUtils.getEndpoint();
+    const endpoint = ASRouterUtils.getPreviewEndpoint();
     ASRouterUtils.addListener(this.onMessageFromParent);
 
     // If we are loading about:welcome we want to trigger the onboarding messages
@@ -223,7 +221,6 @@ export class ASRouterUISurface extends React.PureComponent {
                                   links={this.state.message.content.links}
                                   sendClick={this.sendClick} />}
               UISurface="NEWTAB_FOOTER_BAR"
-              getNextMessage={ASRouterUtils.getNextMessage}
               onBlock={this.onBlockById(this.state.message.id)}
               onAction={ASRouterUtils.executeAction}
               sendUserActionTelemetry={this.sendUserActionTelemetry} />
@@ -238,7 +235,6 @@ export class ASRouterUISurface extends React.PureComponent {
         UISurface="NEWTAB_OVERLAY"
         onAction={ASRouterUtils.executeAction}
         onDoneButton={this.clearBundle(this.state.bundle.bundle)}
-        getNextMessage={ASRouterUtils.getNextMessage}
         sendUserActionTelemetry={this.sendUserActionTelemetry} />);
   }
 
@@ -259,10 +255,10 @@ export class ASRouterUISurface extends React.PureComponent {
     const {message, bundle} = this.state;
     if (!message.id && !bundle.template) { return null; }
     return (
-      <div>
+      <React.Fragment>
         {this.renderPreviewBanner()}
         {bundle.template === "onboarding" ? this.renderOnboarding() : this.renderSnippets()}
-      </div>
+      </React.Fragment>
     );
   }
 }
@@ -276,7 +272,13 @@ export class ASRouterContent {
   }
 
   _mount() {
-    this.containerElement = global.document.getElementById("snippets-container");
+    this.containerElement = global.document.getElementById(ASR_CONTAINER_ID);
+    if (!this.containerElement) {
+      this.containerElement = global.document.createElement("div");
+      this.containerElement.id = ASR_CONTAINER_ID;
+      global.document.body.appendChild(this.containerElement);
+    }
+
     ReactDOM.render(<ASRouterUISurface />, this.containerElement);
   }
 
