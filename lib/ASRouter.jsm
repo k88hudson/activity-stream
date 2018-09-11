@@ -55,21 +55,45 @@ const MessageLoaderUtils = {
    *
    * @param {obj} provider An AS router provider
    * @param {string} provider.url An endpoint that returns an array of messages as JSON
+   * @param {obj} storage A storage object with get() and set() methods for caching.
    * @returns {Promise} resolves with an array of messages, or an empty array if none could be fetched
    */
-  async _remoteLoader(provider) {
+  async _remoteLoader(provider, storage) {
     let remoteMessages = [];
     if (provider.url) {
+      const cacheKey = `RemoteLoaderCache-${provider.url}`;
+      const cached = await storage.get(cacheKey);
+      let etag;
+
+      if (cached) {
+        const {lastUpdated, messages} = cached;
+        if (!MessageLoaderUtils.shouldProviderUpdate({...provider, lastUpdated})) {
+          // Cached messages haven't expired, return early.
+          return messages;
+        }
+        etag = cached.etag;
+        remoteMessages = messages;
+      }
+
+      let headers = new Headers();
+      if (etag) {
+        headers.set("If-None-Match", etag);
+      }
+
       try {
-        const response = await fetch(provider.url);
+        const response = await fetch(provider.url, {headers});
         if (
           // Empty response
           response.status !== 204 &&
+          // Not modified
+          response.status !== 304 &&
           (response.ok || response.status === 302)
         ) {
           remoteMessages = (await response.json())
             .messages
             .map(msg => ({...msg, provider_url: provider.url}));
+          etag = response.headers.get("ETag");
+          storage.set(cacheKey, {messages: remoteMessages, etag, lastUpdated: Date.now()});
         }
       } catch (e) {
         Cu.reportError(e);
@@ -137,10 +161,11 @@ const MessageLoaderUtils = {
    *
    * @param {obj} provider An AS Router provider
    * @param {string} provider.type An AS Router provider type (defaults to "local")
+   * @param {obj} storage A storage object with get() and set() methods for caching.
    * @returns {obj} Returns an object with .messages (an array of messages) and .lastUpdated (the time the messages were updated)
    */
-  async loadMessagesForProvider(provider) {
-    const messages = (await this._getMessageLoader(provider)(provider))
+  async loadMessagesForProvider(provider, storage) {
+    const messages = (await this._getMessageLoader(provider)(provider, storage))
         .map(msg => ({...msg, provider: provider.id}));
     const lastUpdated = Date.now();
     return {messages, lastUpdated};
@@ -275,7 +300,7 @@ class _ASRouter {
       let newState = {messages: [], providers: []};
       for (const provider of this.state.providers) {
         if (needsUpdate.includes(provider)) {
-          const {messages, lastUpdated} = await MessageLoaderUtils.loadMessagesForProvider(provider);
+          const {messages, lastUpdated} = await MessageLoaderUtils.loadMessagesForProvider(provider, this._storage);
           newState.providers.push({...provider, lastUpdated});
           newState.messages = [...newState.messages, ...messages];
         } else {
