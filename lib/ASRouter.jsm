@@ -39,6 +39,8 @@ const LOCAL_MESSAGE_PROVIDERS = {OnboardingMessageProvider, CFRMessageProvider};
 const STARTPAGE_VERSION = "0.1.0";
 
 const MessageLoaderUtils = {
+  STARTPAGE_VERSION,
+
   /**
    * _localLoader - Loads messages for a local provider (i.e. one that lives in mozilla central)
    *
@@ -61,11 +63,21 @@ const MessageLoaderUtils = {
   async _remoteLoader(provider, storage) {
     let remoteMessages = [];
     if (provider.url) {
-      const cacheKey = `RemoteLoaderCache-${provider.url}`;
-      const cached = await storage.get(cacheKey);
+      const cacheKey = "RemoteLoaderCache";
+      let allCached;
+      try {
+        allCached = await storage.get(cacheKey) || {};
+      } catch (e) {
+        // istanbul ignore next
+        Cu.reportError(e);
+        // istanbul ignore next
+        allCached = {};
+      }
+
+      const cached = allCached[provider.id];
       let etag;
 
-      if (cached) {
+      if (cached && cached.url === provider.url && cached.version === STARTPAGE_VERSION) {
         const {lastUpdated, messages} = cached;
         if (!MessageLoaderUtils.shouldProviderUpdate({...provider, lastUpdated})) {
           // Cached messages haven't expired, return early.
@@ -93,7 +105,14 @@ const MessageLoaderUtils = {
             .messages
             .map(msg => ({...msg, provider_url: provider.url}));
           etag = response.headers.get("ETag");
-          storage.set(cacheKey, {messages: remoteMessages, etag, lastUpdated: Date.now()});
+          const cacheInfo = {
+            messages: remoteMessages,
+            etag,
+            lastUpdated: Date.now(),
+            version: STARTPAGE_VERSION
+          };
+
+          storage.set(cacheKey, {...allCached, [provider.id]: cacheInfo});
         }
       } catch (e) {
         Cu.reportError(e);

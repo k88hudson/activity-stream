@@ -1,5 +1,6 @@
 import {GlobalOverrider} from "test/unit/utils";
 import {MessageLoaderUtils} from "lib/ASRouter.jsm";
+const {STARTPAGE_VERSION} = MessageLoaderUtils;
 
 const FAKE_STORAGE = {
   set() {
@@ -84,7 +85,7 @@ describe("MessageLoaderUtils", () => {
         assert.deepEqual(result.messages, []);
       });
 
-      it("should return an cached messages for a 304 response", async () => {
+      it("should return cached messages for a 304 response", async () => {
         clock.tick(302);
         const messages = [{id: "message-1"}, {id: "message-2"}];
         const fakeStorage = {
@@ -93,9 +94,13 @@ describe("MessageLoaderUtils", () => {
           },
           get() {
             return Promise.resolve({
-              messages,
-              etag: "etag0987654321",
-              lastUpdated: 1
+              [provider.id]: {
+                version: STARTPAGE_VERSION,
+                url: provider.url,
+                messages,
+                etag: "etag0987654321",
+                lastUpdated: 1
+              }
             });
           }
         };
@@ -129,9 +134,13 @@ describe("MessageLoaderUtils", () => {
           set() { return Promise.resolve(); },
           get() {
             return Promise.resolve({
-              messages,
-              etag: "etag0987654321",
-              lastUpdated: Date.now()
+              [provider.id]: {
+                version: STARTPAGE_VERSION,
+                url: provider.url,
+                messages,
+                etag: "etag0987654321",
+                lastUpdated: Date.now()
+              }
             });
           }
         };
@@ -150,9 +159,13 @@ describe("MessageLoaderUtils", () => {
           set() { return Promise.resolve(); },
           get() {
             return Promise.resolve({
-              messages: [{id: "message-1"}, {id: "message-2"}],
-              etag: "etag0987654321",
-              lastUpdated: 1
+              [provider.id]: {
+                version: STARTPAGE_VERSION,
+                url: provider.url,
+                messages: [{id: "message-1"}, {id: "message-2"}],
+                etag: "etag0987654321",
+                lastUpdated: 1
+              }
             });
           }
         };
