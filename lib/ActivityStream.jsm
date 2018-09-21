@@ -41,7 +41,7 @@ const DEFAULT_SITES = new Map([
 ]);
 const GEO_PREF = "browser.search.region";
 const SPOCS_GEOS = ["US"];
-const IS_NIGHTLY_OR_UNBRANDED_BUILD = ["nightly", "default"].includes(UpdateUtils.getUpdateChannel(true));
+const IS_NIGHTLY_OR_UNBRANDED_BUILD = ["nightly", "default"].includes(AppConstants.MOZ_UPDATE_CHANNEL);
 
 const ONE_HOUR_IN_MS = 60 * 60 * 1000;
 
