@@ -46,6 +46,52 @@ const REDDIT_ENHANCEMENT_PARAMS = {
 
 const CFR_MESSAGES = [
   {
+    id: "UNICORN_EXPERIMENT",
+    template: "cfr_doorhanger",
+    content: {
+      // This is for telemetry
+      bucket_id: "CFR_M1",
+      notification_text: {string_id: "cfr-doorhanger-extension-notification"},
+      heading_text: {string_id: "cfr-doorhanger-extension-heading"},
+      info_icon: {
+        label: {string_id: "cfr-doorhanger-extension-sumo-link"},
+        sumo_path: "extensionrecommendations",
+      },
+      addon: {
+        id: "387429",
+        title: "Add-on title",
+          // you'll need to land this image as well
+        icon: "resource://activity-stream/data/content/assets/new_icon.png",
+        // rating and users must be included and are hard-coded
+        rating: 4.8,
+        users: 123456,
+        author: "unicorn",
+        amo_url: "https://addons.mozilla.org/en-US/firefox/addon/unicorn-addon/",
+      },
+      text: "Description for unicon add-on blah blah sa stuff about it.",
+      buttons: {
+        primary: {
+          label: {string_id: "cfr-doorhanger-extension-ok-button"},
+          action: {
+            type: "INSTALL_ADDON_FROM_URL",
+            data: {url: null},
+          },
+        },
+        secondary: {
+          label: {string_id: "cfr-doorhanger-extension-cancel-button"},
+          action: {type: "CANCEL"},
+        },
+      },
+    },
+    frequency: {lifetime: 3},
+    targeting: `
+      localeLanguageCode == "en" &&
+      (providerCohorts.cfr == "unicorn_experiment") &&
+      ([@unicorn_addon] intersect addonsInfo.addons|keys)|length == 0 &&
+      (["amazon.com", "ebay.com"] intersect topFrecentSites[.frecency >= 10000]|mapToProperty('host'))|length > 0`,
+    trigger: {id: "openURL", params: ["amazon.com", "ebay.com"]},
+  },
+  {
     id: "AMAZON_ASSISTANT_1",
     template: "cfr_doorhanger",
     content: {
