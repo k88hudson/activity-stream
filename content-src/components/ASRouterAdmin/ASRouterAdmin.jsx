@@ -1,8 +1,9 @@
 import {ASRouterUtils} from "../../asrouter/asrouter-content";
 import {ModalOverlay} from "../../asrouter/components/ModalOverlay/ModalOverlay";
 import React from "react";
+import {SimpleHashRouter} from "./SimpleHashRouter";
 
-export class ASRouterAdmin extends React.PureComponent {
+export class ASRouterAdminInner extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onMessage = this.onMessage.bind(this);
@@ -352,19 +353,40 @@ export class ASRouterAdmin extends React.PureComponent {
       </tbody></table>);
   }
 
-  render() {
-    return (<div className="asrouter-admin outer-wrapper">
-      <h1>AS Router Admin</h1>
-      <h2>Targeting Utilities</h2>
-      <button className="button" onClick={this.expireCache}>Expire Cache</button> (This expires the cache in ASR Targeting for bookmarks and top sites)
-      <h2>Message Providers <button title="Restore all provider settings that ship with Firefox" className="button" onClick={this.resetPref}>Restore default prefs</button></h2>
+  getSection() {
+    const [section] = this.props.location.routes;
+    switch (section) {
+      case "targeting":
+        return (<React.Fragment>
+          <h2>Targeting Utilities</h2>
+          <button className="button" onClick={this.expireCache}>Expire Cache</button> (This expires the cache in ASR Targeting for bookmarks and top sites)
+          {this.renderTargetingParameters()}
+        </React.Fragment>);
+      default:
+        return (<React.Fragment>
+          <h2>Message Providers <button title="Restore all provider settings that ship with Firefox" className="button" onClick={this.resetPref}>Restore default prefs</button></h2>
+          {this.state.providers ? this.renderProviders() : null}
+          <h2>Messages</h2>
+          {this.renderMessageFilter()}
+          {this.renderMessages()}
+        </React.Fragment>);
+    }
+  }
 
-      {this.state.providers ? this.renderProviders() : null}
-      <h2>Messages</h2>
-      {this.renderMessageFilter()}
-      {this.renderMessages()}
-      {this.renderPasteModal()}
-      {this.renderTargetingParameters()}
+  render() {
+    return (<div className="asrouter-admin">
+      <aside className="sidebar">
+        <ul>
+          <li><a href="#asrouter">General</a></li>
+          <li><a href="#asrouter-targeting">Targeting</a></li>
+        </ul>
+      </aside>
+      <main classNmae="main-panel;">
+      <h1>AS Router Admin</h1>
+      {this.getSection()}
+      </main>
     </div>);
   }
 }
+
+export const ASRouterAdmin = props => (<SimpleHashRouter><ASRouterAdminInner {...props} /></SimpleHashRouter>);
