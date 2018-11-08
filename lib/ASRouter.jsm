@@ -52,10 +52,15 @@ const MessageLoaderUtils = {
    *
    * @param {obj} provider An AS router provider
    * @param {Array} provider.messages An array of messages
+   * @param {obj} localProviders An object containing local provider modules
    * @returns {Array} the array of messages
    */
-  _localLoader(provider) {
-    return provider.messages;
+  _localLoader(provider, localProviders) {
+    const localProvider = localProviders[provider.localProvider];
+    if (!localProvider) {
+      Cu.reportError(`Local provider ${provider.localProvider} not found. Are you sure this is the right name?`);
+    }
+    return localProvider ? localProvider.getMessages() : [];
   },
 
   async _remoteLoaderCache(storage) {
@@ -158,24 +163,6 @@ const MessageLoaderUtils = {
   },
 
   /**
-   * _getMessageLoader - return the right loading function given the provider's type
-   *
-   * @param {obj} provider An AS Router provider
-   * @returns {func} A loading function
-   */
-  _getMessageLoader(provider) {
-    switch (provider.type) {
-      case "remote":
-        return this._remoteLoader;
-      case "remote-settings":
-        return this._remoteSettingsLoader;
-      case "local":
-      default:
-        return this._localLoader;
-    }
-  },
-
-  /**
    * shouldProviderUpdate - Given the current time, should a provider update its messages?
    *
    * @param {any} provider An AS Router provider
@@ -194,11 +181,22 @@ const MessageLoaderUtils = {
    * @param {obj} provider An AS Router provider
    * @param {string} provider.type An AS Router provider type (defaults to "local")
    * @param {obj} storage A storage object with get() and set() methods for caching.
+   * @param {obj} localProviders An object containing all local loader modules
    * @returns {obj} Returns an object with .messages (an array of messages) and .lastUpdated (the time the messages were updated)
    */
-  async loadMessagesForProvider(provider, storage) {
-    const loader = this._getMessageLoader(provider);
-    let messages = await loader(provider, storage);
+  async loadMessagesForProvider(provider, storage, localProviders) {
+    let messages;
+    switch (provider.type) {
+      case "remote":
+        messages = await this._remoteLoader(provider, storage);
+        break;
+      case "remote-settings":
+        messages = await this._remoteSettingsLoader(provider);
+        break;
+      case "local":
+      default:
+        messages = await this._localLoader(provider, localProviders);
+    }
     // istanbul ignore if
     if (!messages) {
       messages = [];
@@ -315,11 +313,6 @@ class _ASRouter {
       // make a copy so we don't modify the source of the pref
       const provider = {..._provider};
 
-      if (provider.type === "local" && !provider.messages) {
-        // Get the messages from the local message provider
-        const localProvider = this._localProviders[provider.localProvider];
-        provider.messages = localProvider ? localProvider.getMessages() : [];
-      }
       if (provider.type === "remote" && provider.url) {
         provider.url = provider.url.replace(/%STARTPAGE_VERSION%/g, STARTPAGE_VERSION);
         provider.url = Services.urlFormatter.formatURL(provider.url);
@@ -384,7 +377,7 @@ class _ASRouter {
       let newState = {messages: [], providers: []};
       for (const provider of this.state.providers) {
         if (needsUpdate.includes(provider)) {
-          const {messages, lastUpdated} = await MessageLoaderUtils.loadMessagesForProvider(provider, this._storage);
+          const {messages, lastUpdated} = await MessageLoaderUtils.loadMessagesForProvider(provider, this._storage, this._localProviders);
           newState.providers.push({...provider, lastUpdated});
           newState.messages = [...newState.messages, ...messages];
         } else {
