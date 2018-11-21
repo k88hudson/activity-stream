@@ -283,6 +283,12 @@ class PlacesFeed {
     _target.browser.ownerGlobal.gURLBar.search(`${data.label} `);
   }
 
+  focusAwesomeBar({_target}) {
+    _target.browser.ownerGlobal.gURLBar.hiddenFocus(() => {
+      this.store.dispatch(ac.BroadcastToContent({type: at.REMOVE_SEARCH_FOCUS}));
+    });
+  }
+
   onAction(action) {
     switch (action.type) {
       case at.INIT:
@@ -322,6 +328,9 @@ class PlacesFeed {
         break;
       case at.FILL_SEARCH_TERM:
         this.fillSearchTopSiteTerm(action);
+        break;
+      case at.FOCUS_AWESOME_BAR:
+        this.focusAwesomeBar(action);
         break;
       case at.OPEN_LINK: {
         this.openLink(action);

@@ -14,6 +14,25 @@
     }
   }
 
+  .caret {
+    position: absolute;
+    inset-inline-start: 47px;
+    top: 14px;
+    bottom: 14px;
+    width: 1px;
+    border-right: 1px solid transparent;
+  }
+
+  .caret.focused {
+    animation: CaretAnimation 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards infinite;
+  }
+
+  @keyframes CaretAnimation {
+    50% {
+      border-color: $black;
+    }
+  }
+
   .only-search & {
     padding: 0 0 64px;
   }
@@ -104,7 +123,8 @@
   }
 
   .search-inner-wrapper:active input,
-  input:focus {
+  input:focus,
+  input.focused {
     border: $input-border-active;
     box-shadow: var(--newtab-textbox-focus-boxshadow);
   }

@@ -12,6 +12,7 @@ export class _Search extends React.PureComponent {
     super(props);
     this.onClick = this.onClick.bind(this);
     this.onInputMount = this.onInputMount.bind(this);
+    this.onFocus = this.onFocus.bind(this);
   }
 
   handleEvent(event) {
@@ -57,6 +58,11 @@ export class _Search extends React.PureComponent {
     }
   }
 
+  onFocus(e) {
+    e.preventDefault();
+    this.props.dispatch(ac.AlsoToMain({type: "FOCUS_AWESOME_BAR"}));
+  }
+
   /*
    * Do not change the ID on the input field, as legacy newtab code
    * specifically looks for the id 'newtab-search-text' on input fields
@@ -66,7 +72,7 @@ export class _Search extends React.PureComponent {
     return (<div className="search-wrapper">
       {this.props.showLogo &&
         <div className="logo-and-wordmark">
-          <div className="logo" />
+        <div className="logo" />
           <div className="wordmark" />
         </div>
       }
@@ -74,13 +80,18 @@ export class _Search extends React.PureComponent {
         <label htmlFor="newtab-search-text" className="search-label">
           <span className="sr-only"><FormattedMessage id="search_web_placeholder" /></span>
         </label>
+        <span className={`caret ${this.props.searchFocus ? "focused" : ""}`} />
         <input
           id="newtab-search-text"
+          ariaHidden={true}
+          tabIndex={-1}
           maxLength="256"
           placeholder={this.props.intl.formatMessage({id: "search_web_placeholder"})}
           ref={this.onInputMount}
           title={this.props.intl.formatMessage({id: "search_web_placeholder"})}
-          type="search" />
+          type="search"
+          onFocus={this.onFocus}
+          className={this.props.searchFocus ? "focused" : ""} />
         <button
           id="searchSubmit"
           className="search-button"
@@ -93,4 +104,4 @@ export class _Search extends React.PureComponent {
   }
 }
 
-export const Search = connect()(injectIntl(_Search));
+export const Search = connect(state => ({searchFocus: state.App.searchFocus}))(injectIntl(_Search));

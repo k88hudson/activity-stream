@@ -15,6 +15,7 @@ const INITIAL_STATE = {
   App: {
     // Have we received real data from the app yet?
     initialized: false,
+    searchFocus: false,
   },
   ASRouter: {
     initialized: false,
@@ -53,6 +54,10 @@ function App(prevState = INITIAL_STATE.App, action) {
   switch (action.type) {
     case at.INIT:
       return Object.assign({}, prevState, action.data || {}, {initialized: true});
+    case at.FOCUS_AWESOME_BAR:
+      return {...prevState, searchFocus: true};
+    case at.REMOVE_SEARCH_FOCUS:
+      return {...prevState, searchFocus: false};
     default:
       return prevState;
   }
