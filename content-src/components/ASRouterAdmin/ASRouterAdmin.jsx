@@ -68,14 +68,15 @@ class DiscoveryStreamAdmin extends React.PureComponent {
         </Row>
         <Row>
           <td className="min">Data last fetched</td>
-          <td>{relativeTime(feeds[feed.url].lastUpdated) || "(no data)"}</td>
+          <td>{relativeTime(feeds[feed.url] && feeds[feed.url].lastUpdated) || "(no data)"}</td>
         </Row>
       </React.Fragment>
     );
   }
 
   render() {
-    const {config, lastUpdated, layout} = this.props.state;
+    const {config, lastUpdated, layout, spocs} = this.props.state;
+
     return (<div>
       <div className="dsEnabled"><input type="checkbox" checked={config.enabled} onChange={this.onEnableToggle} /> enabled</div>
 
@@ -84,17 +85,25 @@ class DiscoveryStreamAdmin extends React.PureComponent {
         <Row><td className="min">Endpoint</td><td>{config.layout_endpoint || "(empty)"}</td></Row>
       </tbody></table>
 
-      <h3>Layout</h3>
+      {config.enabled && <React.Fragment>
+        <h3>Layout</h3>
+        {layout.map((row, rowIndex) => (
+          <div key={`row-${rowIndex}`}>
+            {row.components.map((component, componentIndex) => (
+              <div key={`component-${componentIndex}`} className="ds-component">
+                {this.renderComponent(row.width, component)}
+              </div>
+            ))}
+          </div>
+        ))}
 
-      {layout.map((row, rowIndex) => (
-        <div key={`row-${rowIndex}`}>
-          {row.components.map((component, componentIndex) => (
-            <div key={`component-${componentIndex}`} className="ds-component">
-              {this.renderComponent(row.width, component)}
-            </div>
-          ))}
-        </div>
-      ))}
+        <h3>Spocs</h3>
+        <table style={config.enabled ? null : {opacity: 0.5}}><tbody>
+        <Row><td className="min">Data last fetched</td><td>{relativeTime(lastUpdated) || "(no data)"}</td></Row>
+        <Row><td className="min">Endpoint</td><td>{spocs.spocs_endpoint || "(empty)"}</td></Row>
+      </tbody></table>
+      </React.Fragment>}
+
     </div>);
   }
 }
