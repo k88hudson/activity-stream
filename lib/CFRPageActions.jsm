@@ -224,74 +224,76 @@ class PageAction {
   async _renderPopup(message, browser) { // eslint-disable-line max-statements
     const {id, content} = message;
 
-    const headerLabel = this.window.document.getElementById("cfr-notification-header-label");
-    const headerLink = this.window.document.getElementById("cfr-notification-header-link");
-    const headerImage = this.window.document.getElementById("cfr-notification-header-image");
-    const author = this.window.document.getElementById("cfr-notification-author");
-    const footerText = this.window.document.getElementById("cfr-notification-footer-text");
-    const footerFilledStars = this.window.document.getElementById("cfr-notification-footer-filled-stars");
-    const footerEmptyStars = this.window.document.getElementById("cfr-notification-footer-empty-stars");
-    const footerUsers = this.window.document.getElementById("cfr-notification-footer-users");
-    const footerSpacer = this.window.document.getElementById("cfr-notification-footer-spacer");
-    const footerLink = this.window.document.getElementById("cfr-notification-footer-learn-more-link");
+    const elements = {
+      headerLabel: this.window.document.getElementById("cfr-notification-header-label"),
+      headerLink: this.window.document.getElementById("cfr-notification-header-link"),
+      headerImage: this.window.document.getElementById("cfr-notification-header-image"),
+      author: this.window.document.getElementById("cfr-notification-author"),
+      footerText: this.window.document.getElementById("cfr-notification-footer-text"),
+      footerFilledStars: this.window.document.getElementById("cfr-notification-footer-filled-stars"),
+      footerEmptyStars: this.window.document.getElementById("cfr-notification-footer-empty-stars"),
+      footerUsers: this.window.document.getElementById("cfr-notification-footer-users"),
+      footerSpacer: this.window.document.getElementById("cfr-notification-footer-spacer"),
+      footerLink: this.window.document.getElementById("cfr-notification-footer-learn-more-link"),
+    };
 
-    headerLabel.value = await this.getStrings(content.heading_text);
-    headerLink.setAttribute("href", SUMO_BASE_URL + content.info_icon.sumo_path);
-    headerLink.setAttribute(this.window.RTL_UI ? "left" : "right", 0);
-    headerImage.setAttribute("tooltiptext", await this.getStrings(content.info_icon.label, "tooltiptext"));
-    headerLink.onclick = () => this._sendTelemetry({message_id: id, bucket_id: content.bucket_id, event: "RATIONALE"});
+    elements.headerLabel.value = await this.getStrings(content.heading_text);
+    elements.headerLink.setAttribute("href", SUMO_BASE_URL + content.info_icon.sumo_path);
+    elements.headerLink.setAttribute(this.window.RTL_UI ? "left" : "right", 0);
+    elements.headerImage.setAttribute("tooltiptext", await this.getStrings(content.info_icon.label, "tooltiptext"));
+    elements.headerLink.onclick = () => this._sendTelemetry({message_id: id, bucket_id: content.bucket_id, event: "RATIONALE"});
 
-    author.textContent = await this.getStrings({
+    elements.author.textContent = await this.getStrings({
       string_id: "cfr-doorhanger-extension-author",
       args: {name: content.addon.author},
     });
 
-    footerText.textContent = await this.getStrings(content.text);
+    elements.footerText.textContent = await this.getStrings(content.text);
 
     const {rating} = content.addon;
     if (rating) {
       const MAX_RATING = 5;
       const STARS_WIDTH = 17 * MAX_RATING;
       const calcWidth = stars => `${stars / MAX_RATING * STARS_WIDTH}px`;
-      footerFilledStars.style.width = calcWidth(rating);
-      footerEmptyStars.style.width = calcWidth(MAX_RATING - rating);
+      elements.footerFilledStars.style.width = calcWidth(rating);
+      elements.footerEmptyStars.style.width = calcWidth(MAX_RATING - rating);
 
       const ratingString = await this.getStrings({
         string_id: "cfr-doorhanger-extension-rating",
         args: {total: rating},
       }, "tooltiptext");
-      footerFilledStars.setAttribute("tooltiptext", ratingString);
-      footerEmptyStars.setAttribute("tooltiptext", ratingString);
+      elements.footerFilledStars.setAttribute("tooltiptext", ratingString);
+      elements.footerEmptyStars.setAttribute("tooltiptext", ratingString);
     } else {
-      footerFilledStars.style.width = "";
-      footerEmptyStars.style.width = "";
-      footerFilledStars.removeAttribute("tooltiptext");
-      footerEmptyStars.removeAttribute("tooltiptext");
+      elements.footerFilledStars.style.width = "";
+      elements.footerEmptyStars.style.width = "";
+      elements.footerFilledStars.removeAttribute("tooltiptext");
+      elements.footerEmptyStars.removeAttribute("tooltiptext");
     }
 
     const {users} = content.addon;
     if (users) {
-      footerUsers.setAttribute("value", await this.getStrings({
+      elements.footerUsers.setAttribute("value", await this.getStrings({
         string_id: "cfr-doorhanger-extension-total-users",
         args: {total: users},
       }));
-      footerUsers.removeAttribute("hidden");
+      elements.footerUsers.removeAttribute("hidden");
     } else {
       // Prevent whitespace around empty label from affecting other spacing
-      footerUsers.setAttribute("hidden", true);
-      footerUsers.removeAttribute("value");
+      elements.footerUsers.setAttribute("hidden", true);
+      elements.footerUsers.removeAttribute("value");
     }
 
     // Spacer pushes the link to the opposite end when there's other content
     if (rating || users) {
-      footerSpacer.removeAttribute("hidden");
+      elements.footerSpacer.removeAttribute("hidden");
     } else {
-      footerSpacer.setAttribute("hidden", true);
+      elements.footerSpacer.setAttribute("hidden", true);
     }
 
-    footerLink.value = await this.getStrings({string_id: "cfr-doorhanger-extension-learn-more-link"});
-    footerLink.setAttribute("href", content.addon.amo_url);
-    footerLink.onclick = () => this._sendTelemetry({message_id: id, bucket_id: content.bucket_id, event: "LEARN_MORE"});
+    elements.footerLink.value = await this.getStrings({string_id: "cfr-doorhanger-extension-learn-more-link"});
+    elements.footerLink.setAttribute("href", content.addon.amo_url);
+    elements.footerLink.onclick = () => this._sendTelemetry({message_id: id, bucket_id: content.bucket_id, event: "LEARN_MORE"});
 
     const {primary, secondary} = content.buttons;
     const primaryBtnStrings = await this.getStrings(primary.label);
