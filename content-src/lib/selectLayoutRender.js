@@ -1,27 +1,61 @@
 import {createSelector} from "reselect";
 
+export const selectRolls = createSelector(
+  [
+    state => state.DiscoveryStream.layout,
+  ],
+  function getSpocRolls(layout) {
+    // 3 sections
+    // [ [spocPos, probablity], [spocPos, probablity], [spocPos, probablity] ]
+    return [
+      true,
+      false,
+      false,
+      true,
+    ];
+  },
+);
+
+export const addRollsToLayout = createSelector(
+  [
+    state => state.DiscoveryStream.layout,
+  ],
+  layout => {
+    return layout.map(component => {
+      const rolls = [];
+      // Calculate rolls based on probability
+      return {
+        ...component,
+        spocs: {
+          ...component.spocs,
+          rolls,
+        },
+      };
+    });
+  },
+);
+
 export const selectLayoutRender = createSelector(
   // Selects layout, feeds, spocs so that we only recompute if
   // any of these values change.
   [
-    state => state.DiscoveryStream.layout,
+    addRollsToLayout,
     state => state.DiscoveryStream.feeds,
     state => state.DiscoveryStream.spocs,
+    // selectRolls,
   ],
 
   // Adds data to each component from feeds. This function only re-runs if one of the inputs change.
-  // TODO: calculate spocs
   function layoutRender(layout, feeds, spocs) {
     let spocIndex = 0;
 
     function maybeInjectSpocs(data, spocsConfig) {
       if (data &&
-          spocsConfig && spocsConfig.positions && spocsConfig.positions.length &&
+          spocsConfig && spocsConfig.rolls && spocsConfig.rolls.length &&
           spocs.data.spocs && spocs.data.spocs.length) {
         const recommendations = [...data.recommendations];
-        for (let position of spocsConfig.positions) {
-          let rickRoll = Math.random();
-          if (spocs.data.spocs[spocIndex] && rickRoll <= spocsConfig.probability) {
+        for (let position of spocsConfig.rolls) {
+          if (spocs.data.spocs[spocIndex]) {
             recommendations.splice(position.index, 0, spocs.data.spocs[spocIndex++]);
           }
         }
@@ -77,3 +111,4 @@ export const selectLayoutRender = createSelector(
     }));
   }
 );
+
