@@ -42,13 +42,14 @@ export class SimpleSnippet extends React.PureComponent {
 
   renderTitleIcon() {
     const titleIconLight = safeURI(this.props.content.title_icon);
-    const titleIconDark = safeURI(this.props.content.title_icon_dark_theme);
-    if (!titleIconLight && !titleIconDark) {
+    const titleIconDark = safeURI(this.props.content.title_icon_dark_theme || this.props.content.title_icon);
+    if (!titleIconLight) {
       return null;
     }
 
     return (<React.Fragment>
-      <span className="titleIcon icon-light-theme" style={{backgroundImage: `url("${titleIconLight}")`}} /><span className="titleIcon icon-dark-theme" style={{backgroundImage: `url("${titleIconDark}")`}} />
+        <span className="titleIcon icon-light-theme" style={{backgroundImage: `url("${titleIconLight}")`}} />
+        <span className="titleIcon icon-dark-theme" style={{backgroundImage: `url("${titleIconDark}")`}} />
       </React.Fragment>);
   }
 
@@ -91,7 +92,7 @@ export class SimpleSnippet extends React.PureComponent {
     // an icon and text must be specified to render the section header
     if (props.content.section_title_icon && props.content.section_title_text) {
       const sectionTitleIconLight = safeURI(props.content.section_title_icon);
-      const sectionTitleIconDark = safeURI(props.content.section_title_icon_dark_theme);
+      const sectionTitleIconDark = safeURI(props.content.section_title_icon_dark_theme || props.content.section_title_icon);
       const sectionTitleURL = props.content.section_title_url;
 
       return (
@@ -129,7 +130,7 @@ export class SimpleSnippet extends React.PureComponent {
       {sectionHeader}
       <ConditionalWrapper condition={sectionHeader} wrap={this.wrapSnippetContent}>
         <img src={safeURI(props.content.icon) || DEFAULT_ICON_PATH} className="icon icon-light-theme" />
-        <img src={safeURI(props.content.icon_dark_theme) || DEFAULT_ICON_PATH} className="icon icon-dark-theme" />
+        <img src={safeURI(props.content.icon_dark_theme || props.content.icon) || DEFAULT_ICON_PATH} className="icon icon-dark-theme" />
         <div>
           {this.renderTitle()} <p className="body">{this.renderText()}</p>
           {this.props.extraContent}

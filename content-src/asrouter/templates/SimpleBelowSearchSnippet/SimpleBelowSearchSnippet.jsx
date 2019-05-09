@@ -24,7 +24,8 @@ export class SimpleBelowSearchSnippet extends React.PureComponent {
     }
 
     return (<SnippetBase {...props} className={className} textStyle={this.props.textStyle}>
-      <img src={safeURI(props.content.icon) || DEFAULT_ICON_PATH} className="icon" />
+      <img src={safeURI(props.content.icon) || DEFAULT_ICON_PATH} className="icon icon-light-theme" />
+      <img src={safeURI(props.content.icon_dark_theme || props.content.icon) || DEFAULT_ICON_PATH} className="icon icon-dark-theme" />
       <div>
         <p className="body">{this.renderText()}</p>
         {this.props.extraContent}
