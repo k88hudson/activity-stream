@@ -20,7 +20,15 @@ const initialState = {
 let didAddFluent = false;
 
 export const FirstRun = props => {
-  const { interrupt, triplets, sendUserActionTelemetry, fxaEndpoint, dispatch, executeAction} = props;
+  const {
+    interrupt,
+    triplets,
+    sendUserActionTelemetry,
+    fxaEndpoint,
+    dispatch,
+    executeAction,
+    onDismiss
+  } = props;
   const hasInterrupt = Boolean(props.interrupt);
   const hasTriplets = Boolean(props.triplets && props.triplets.length);
   const UTMTerm = interrupt.utm_term;
@@ -89,6 +97,12 @@ export const FirstRun = props => {
   });
 
   const closeTriplets = () => setState({ isTripletsContainerVisible: false });
+
+  const dismissAndGoNext = () => {
+    onDismiss();
+    closeInterrupt();
+  };
+
   return (
     <>
       {isInterruptVisble ? (
@@ -100,6 +114,7 @@ export const FirstRun = props => {
           sendUserActionTelemetry={sendUserActionTelemetry}
           dispatch={dispatch}
           flowParams={flowParams}
+          onDismiss={dismissAndGoNext}
           fxaEndpoint={fxaEndpoint}
         />
       ) : null}

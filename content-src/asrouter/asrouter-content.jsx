@@ -6,15 +6,12 @@ import { LocalizationProvider } from "fluent-react";
 import { NEWTAB_DARK_THEME } from "content-src/lib/constants";
 import React from "react";
 import ReactDOM from "react-dom";
-import { ReturnToAMO } from "./templates/ReturnToAMO/ReturnToAMO";
 import { SnippetsTemplates } from "./templates/template-manifest";
-import { StartupOverlay } from "./templates/StartupOverlay/StartupOverlay";
-import { Trailhead } from "./templates/Trailhead/Trailhead";
 import { FirstRun } from "./templates/FirstRun/FirstRun";
 
 const INCOMING_MESSAGE_NAME = "ASRouter:parent-to-child";
 const OUTGOING_MESSAGE_NAME = "ASRouter:child-to-parent";
-const TEMPLATES_ABOVE_PAGE = ["trailhead"];
+const TEMPLATES_ABOVE_PAGE = ["trailhead", "fxa_overlay", "return_to_amo"];
 const TEMPLATES_BELOW_SEARCH = ["simple_below_search_snippet"];
 
 export const ASRouterUtils = {
@@ -98,18 +95,6 @@ function shouldSendImpressionOnUpdate(nextProps, prevProps) {
   );
 }
 
-// interface ASRMessage {
-//     provider?: string;
-//     content?: { [key: string]: any };
-//     template?: string;
-//     id?: string;
-//     bundle?: Message[]
-// }
-
-// interface ASRState {
-//   message: ASRMessage;
-// }
-
 export class ASRouterUISurface extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -183,27 +168,7 @@ export class ASRouterUISurface extends React.PureComponent {
   onDismissById(id) {
     return () => ASRouterUtils.dismissById(id);
   }
-
-  dismissBundle(bundle) {
-    return () => {
-      ASRouterUtils.dismissBundle(bundle);
-      this.sendUserActionTelemetry({
-        event: "DISMISS",
-        id: "onboarding-cards",
-        message_id: bundle.map(m => m.id).join(","),
-        // Passing the action because some bundles (Trailhead) don't have a provider set
-        action: "onboarding_user_event",
-      });
-    };
-  }
-
-  triggerOnboarding() {
-    ASRouterUtils.sendMessage({
-      type: "TRIGGER",
-      data: { trigger: { id: "showOnboarding" } },
-    });
-  }
-
+  
   clearMessage(id) {
     if (id === this.state.message.id) {
       this.setState({ message: {} });
@@ -300,54 +265,6 @@ export class ASRouterUISurface extends React.PureComponent {
     );
   }
 
-  renderFirstRunOverlay() {
-    const { message } = this.state;
-    if (message.template === "fxa_overlay") {
-      global.document.body.classList.add("fxa");
-      return (
-        <StartupOverlay
-          onReady={this.triggerOnboarding}
-          onBlock={this.onDismissById(message.id)}
-          dispatch={this.props.dispatch}
-        />
-      );
-    } else if (message.template === "return_to_amo_overlay") {
-      global.document.body.classList.add("amo");
-      return (
-        <LocalizationProvider
-          bundles={generateBundles({ amo_html: message.content.text })}>
-          <ReturnToAMO
-            {...message}
-            UISurface="NEWTAB_OVERLAY"
-            onReady={this.triggerOnboarding}
-            onBlock={this.onDismissById(message.id)}
-            onAction={ASRouterUtils.executeAction}
-            sendUserActionTelemetry={this.sendUserActionTelemetry}
-          />
-        </LocalizationProvider>
-      );
-    }
-    return null;
-  }
-
-  renderTrailhead() {
-    const { message } = this.state;
-    if (message.template === "trailhead") {
-      return (
-        <Trailhead
-          document={this.props.document}
-          message={message}
-          onAction={ASRouterUtils.executeAction}
-          onDismissBundle={this.dismissBundle(this.state.message.bundle)}
-          sendUserActionTelemetry={this.sendUserActionTelemetry}
-          dispatch={this.props.dispatch}
-          fxaEndpoint={this.props.fxaEndpoint}
-        />
-      );
-    }
-    return null;
-  }
-
   renderPreviewBanner() {
     if (this.state.message.provider !== "preview") {
       return null;
@@ -370,7 +287,9 @@ export class ASRouterUISurface extends React.PureComponent {
         sendUserActionTelemetry={this.sendUserActionTelemetry}
         executeAction={ASRouterUtils.executeAction}
         dispatch={this.props.dispatch}
+        onDismiss={this.onDismissById(this.state.message.id)}
         fxaEndpoint={this.props.fxaEndpoint} />
+ 
     }
     return null;
   }
@@ -397,8 +316,6 @@ export class ASRouterUISurface extends React.PureComponent {
         <>
           {this.renderPreviewBanner()}
           {this.renderFirstRun()}
-          {/* {this.renderTrailhead()}
-          {this.renderFirstRunOverlay()} */}
           {this.renderSnippets()}
         </>,
         shouldRenderInHeader ? this.headerPortal : this.footerPortal

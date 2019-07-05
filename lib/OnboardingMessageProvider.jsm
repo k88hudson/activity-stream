@@ -385,6 +385,7 @@ const ONBOARDING_MESSAGES = async () => ([
     id: "FXA_1",
     template: "fxa_overlay",
     trigger: {id: "firstRun"},
+    includeBundle: {length: 3, template: "onboarding", trigger: {id: "showOnboarding"}},
   },
   {
     id: "RETURN_TO_AMO_1",

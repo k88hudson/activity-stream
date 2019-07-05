@@ -1,14 +1,6 @@
 import React from "react";
 import {OnboardingCard} from "../../templates/OnboardingMessage/OnboardingMessage";
 
-// interface TripletsProps {
-//   showCardPanel: boolean;
-//   showCards: boolean;
-//   hideCardPanel: () => {};
-//   cards: Array<{ id: string }>;
-//   sendUserActionTelemetry: () => {};
-// }
-
 export class Triplets extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -51,6 +43,7 @@ export class Triplets extends React.PureComponent {
       hideContainer,
       sendUserActionTelemetry,
     } = this.props;
+
     return (
       <div
         className={`trailheadCards ${

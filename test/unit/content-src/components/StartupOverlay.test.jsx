@@ -1,7 +1,7 @@
 import {actionCreators as ac, actionTypes as at} from "common/Actions.jsm";
 import {mount} from "enzyme";
 import React from "react";
-import {_StartupOverlay as StartupOverlay} from "content-src/asrouter/templates/StartupOverlay/StartupOverlay";
+import {StartupOverlay} from "content-src/asrouter/templates/StartupOverlay/StartupOverlay";
 
 describe("<StartupOverlay>", () => {
   let wrapper;

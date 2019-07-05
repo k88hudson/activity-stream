@@ -8,6 +8,7 @@ import { generateBundles } from "../../rich-text-strings";
 export class Interrupt extends React.PureComponent {
   render() {
     const {
+      onDismiss,
       onNextScene,
       message,
       sendUserActionTelemetry,
@@ -25,14 +26,14 @@ export class Interrupt extends React.PureComponent {
           <ReturnToAMO
             {...message}
             UISurface="NEWTAB_OVERLAY"
-            onBlock={onNextScene}
+            onBlock={onDismiss}
             onAction={executeAction}
             sendUserActionTelemetry={sendUserActionTelemetry}
           />
         </LocalizationProvider>);
       case "fxa_overlay":
         return (<StartupOverlay
-          onBlock={onNextScene}
+          onBlock={onDismiss}
           dispatch={dispatch}
           fxa_endpoint={fxaEndpoint}
         />);
@@ -42,7 +43,6 @@ export class Interrupt extends React.PureComponent {
           message={message}
           onNextScene={onNextScene}
           onAction={executeAction}
-          onDismissBundle={onNextScene}
           sendUserActionTelemetry={sendUserActionTelemetry}
           dispatch={dispatch}
           fxaEndpoint={fxaEndpoint}
