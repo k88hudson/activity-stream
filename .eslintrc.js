@@ -45,6 +45,7 @@ module.exports = {
       "files": [
         "content-src/asrouter/templates/OnboardingMessage/**",
         "content-src/asrouter/templates/Trailhead/**",
+        "content-src/asrouter/components/FirstRun/**",
         "content-src/asrouter/templates/StartupOverlay/StartupOverlay.jsx",
         "content-src/components/TopSites/**",
         "content-src/components/MoreRecommendations/MoreRecommendations.jsx",
@@ -76,7 +77,7 @@ module.exports = {
 
     "react/jsx-boolean-value": [2, "always"],
     "react/jsx-key": 2,
-    "react/jsx-no-bind": 2,
+    "react/jsx-no-bind": 0,
     "react/jsx-no-comment-textnodes": 2,
     "react/jsx-no-duplicate-props": 2,
     "react/jsx-no-target-blank": 2,

@@ -10,6 +10,7 @@ import { ReturnToAMO } from "./templates/ReturnToAMO/ReturnToAMO";
 import { SnippetsTemplates } from "./templates/template-manifest";
 import { StartupOverlay } from "./templates/StartupOverlay/StartupOverlay";
 import { Trailhead } from "./templates/Trailhead/Trailhead";
+import { FirstRun } from "./templates/FirstRun/FirstRun";
 
 const INCOMING_MESSAGE_NAME = "ASRouter:parent-to-child";
 const OUTGOING_MESSAGE_NAME = "ASRouter:child-to-parent";
@@ -360,6 +361,20 @@ export class ASRouterUISurface extends React.PureComponent {
     );
   }
 
+  renderFirstRun() {
+    const { message } = this.state;
+    if (this.props.document.location.href === "about:welcome") {
+      return <FirstRun
+        interrupt={message}
+        triplets={message.bundle}
+        sendUserActionTelemetry={this.sendUserActionTelemetry}
+        executeAction={ASRouterUtils.executeAction}
+        dispatch={this.props.dispatch}
+        fxaEndpoint={this.props.fxaEndpoint} />
+    }
+    return null;
+  }
+
   render() {
     const { message } = this.state;
     if (!message.id) {
@@ -381,8 +396,9 @@ export class ASRouterUISurface extends React.PureComponent {
       ReactDOM.createPortal(
         <>
           {this.renderPreviewBanner()}
-          {this.renderTrailhead()}
-          {this.renderFirstRunOverlay()}
+          {this.renderFirstRun()}
+          {/* {this.renderTrailhead()}
+          {this.renderFirstRunOverlay()} */}
           {this.renderSnippets()}
         </>,
         shouldRenderInHeader ? this.headerPortal : this.footerPortal

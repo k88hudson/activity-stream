@@ -1,14 +1,7 @@
-import {actionCreators as ac, actionTypes as at} from "common/Actions.jsm";
-import {connect} from "react-redux";
+import {actionCreators as ac} from "common/Actions.jsm";
 import React from "react";
 
-const FLUENT_FILES = [
-  "branding/brand.ftl",
-  "browser/branding/sync-brand.ftl",
-  "browser/newtab/onboarding.ftl",
-];
-
-export class _StartupOverlay extends React.PureComponent {
+export class StartupOverlay extends React.PureComponent {
   constructor(props) {
     super(props);
     this.onInputChange = this.onInputChange.bind(this);
@@ -21,8 +14,8 @@ export class _StartupOverlay extends React.PureComponent {
     this.utmParams = "utm_source=activity-stream&utm_campaign=firstrun&utm_medium=referral&utm_term=trailhead-control";
 
     this.state = {
+      show: false,
       emailInput: "",
-      overlayRemoved: false,
       deviceId: "",
       flowId: "",
       flowBeginTime: 0,
@@ -30,32 +23,8 @@ export class _StartupOverlay extends React.PureComponent {
     this.didFetch = false;
   }
 
-  async componentWillUpdate() {
-    if (this.props.fxa_endpoint && !this.didFetch) {
-      try {
-        this.didFetch = true;
-        const fxaParams = "entrypoint=activity-stream-firstrun&form_type=email";
-        const response = await fetch(`${this.props.fxa_endpoint}/metrics-flow?${fxaParams}&${this.utmParams}`, {credentials: "omit"});
-        if (response.status === 200) {
-          const {deviceId, flowId, flowBeginTime} = await response.json();
-          this.setState({deviceId, flowId, flowBeginTime});
-        } else {
-          this.props.dispatch(ac.OnlyToMain({type: at.TELEMETRY_UNDESIRED_EVENT, data: {event: "FXA_METRICS_FETCH_ERROR", value: response.status}}));
-        }
-      } catch (error) {
-        this.props.dispatch(ac.OnlyToMain({type: at.TELEMETRY_UNDESIRED_EVENT, data: {event: "FXA_METRICS_ERROR"}}));
-      }
-    }
-  }
-
-  async componentWillMount() {
-    FLUENT_FILES.forEach(file => {
-      const link = document.head.appendChild(document.createElement("link"));
-      link.href = file;
-      link.rel = "localization";
-    });
-
-    await this.componentWillUpdate(this.props);
+  componentWillMount() {
+    global.document.body.classList.add("fxa");
   }
 
   componentDidMount() {
@@ -67,7 +36,6 @@ export class _StartupOverlay extends React.PureComponent {
     // to trigger the animation.
     setTimeout(() => {
       this.setState({show: true});
-      this.props.onReady();
     }, 10);
   }
 
@@ -75,11 +43,11 @@ export class _StartupOverlay extends React.PureComponent {
     window.removeEventListener("visibilitychange", this.removeOverlay);
     document.body.classList.remove("hide-main", "fxa");
     this.setState({show: false});
-    this.props.onBlock();
+
     setTimeout(() => {
       // Allow scrolling and fully remove overlay after animation finishes.
+      this.props.onBlock();
       document.body.classList.remove("welcome");
-      this.setState({overlayRemoved: true});
     }, 400);
   }
 
@@ -118,13 +86,6 @@ export class _StartupOverlay extends React.PureComponent {
   }
 
   render() {
-    // When skipping the onboarding tour we show AS but we are still on
-    // about:welcome, prop.isFirstrun is true and StartupOverlay is rendered
-    if (this.state.overlayRemoved) {
-      return null;
-    }
-
- 
     return (
       <div className={`overlay-wrapper ${this.state.show ? "show" : ""}`}>
         <div className="background" />
@@ -149,11 +110,11 @@ export class _StartupOverlay extends React.PureComponent {
                 <input name="utm_campaign" type="hidden" value="firstrun" />
                 <input name="utm_medium" type="hidden" value="referral" />
                 <input name="utm_term" type="hidden" value="trailhead-control" />
-                <input name="device_id" type="hidden" value={this.state.deviceId} />
-                <input name="flow_id" type="hidden" value={this.state.flowId} />
-                <input name="flow_begin_time" type="hidden" value={this.state.flowBeginTime} />
+                <input name="device_id" type="hidden" value={this.props.flowParams.deviceId} />
+                <input name="flow_id" type="hidden" value={this.props.flowParams.flowId} />
+                <input name="flow_begin_time" type="hidden" value={this.props.flowParams.flowBeginTime} />
                 <span className="error" data-l10n-id="onboarding-sync-form-invalid-input" />
-                <input className="email-input" name="email" type="email" required="true" onInvalid={this.onInputInvalid} onChange={this.onInputChange} data-l10n-id="onboarding-sync-form-input" />
+                <input className="email-input" name="email" type="email" required={true} onInvalid={this.onInputInvalid} onChange={this.onInputChange} data-l10n-id="onboarding-sync-form-input" />
                 <div className="extra-links">
                 <p data-l10n-id="onboarding-sync-legal-notice">
                   <a data-l10n-name="terms" target="_blank" rel="noopener noreferrer"
@@ -173,5 +134,7 @@ export class _StartupOverlay extends React.PureComponent {
   }
 }
 
-const getState = state => ({fxa_endpoint: state.Prefs.values.fxa_endpoint});
-export const StartupOverlay = connect(getState)(_StartupOverlay);
+
+StartupOverlay.defaultProps = {
+  flowParams: { deviceId: "", flowId: "", flowBeginTime: "" }
+};

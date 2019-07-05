@@ -52,6 +52,7 @@ const TRAILHEAD_CONFIG = {
       ["sync"],
       ["nofirstrun"],
       ["cards"],
+      ["fxa"],
     ],
     triplets: [
       ["supercharge"],
