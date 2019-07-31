@@ -18,6 +18,7 @@ const filesToVendor = {
   "react-dom/umd/react-dom.development.js": "react-dom-dev.js",
   "react-redux/LICENSE.md": "REACT_REDUX_LICENSE",
   "react-redux/dist/react-redux.min.js": "react-redux.js",
+  "react-transition-group/dist/react-transition-group.min.js": "react-transition-group.js",
 };
 
 set("-v"); // Echo all the copy commands so the user can see what's going on
